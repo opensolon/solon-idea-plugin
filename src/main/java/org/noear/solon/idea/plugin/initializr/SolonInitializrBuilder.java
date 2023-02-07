@@ -4,6 +4,7 @@ import com.intellij.ide.projectWizard.ProjectSettingsStep;
 import com.intellij.ide.util.projectWizard.*;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.module.StdModuleTypes;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.roots.ModifiableRootModel;
 import com.intellij.openapi.util.NlsContexts;
@@ -13,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.noear.solon.idea.plugin.SolonIcons;
 import org.noear.solon.idea.plugin.initializr.step.ProjectDetailsStep;
-import org.noear.solon.idea.plugin.module.SolonModuleType;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -79,7 +79,7 @@ public class SolonInitializrBuilder extends ModuleBuilder {
 
     @Override
     public ModuleType<?> getModuleType() {
-        return SolonModuleType.getInstance();
+        return StdModuleTypes.JAVA;
     }
 
 

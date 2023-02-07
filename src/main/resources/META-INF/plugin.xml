@@ -9,7 +9,6 @@
     <depends>com.intellij.uiDesigner</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <moduleType id="SOLON_MODULE_TYPE" implementationClass="org.noear.solon.idea.plugin.module.SolonModuleType"></moduleType>
         <moduleBuilder
                 builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"
                 order="last"/>

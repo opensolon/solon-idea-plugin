@@ -2,8 +2,10 @@ package org.noear.solon.idea.plugin.initializr;
 
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;
+import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.JavaSdkVersion;
 import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.projectRoots.SdkModel;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.pom.java.LanguageLevel;
 import org.noear.solon.idea.plugin.initializr.util.SolonInitializrUtil;
@@ -61,15 +63,16 @@ public class SolonCreationMetadata {
         return StringUtil.isNotEmpty(this.packageName) && getInstance().isQualifiedName(this.packageName);
     }
 
-    public boolean hasCompatibleJavaVersion(ModuleBuilder moduleBuilder,
-                                            WizardContext wizardContext) {
-        JavaSdkVersion wizardSdkVersion = SolonInitializrUtil.from(wizardContext, moduleBuilder);
-        if (wizardSdkVersion != null) {
-            LanguageLevel selectedLanguageLevel = LanguageLevel.parse(javaVersion);
-            JavaSdkVersion selectedSdkVersion =
-                    selectedLanguageLevel != null ? JavaSdkVersion.fromLanguageLevel(selectedLanguageLevel) : null;
-            // only if selected java version is compatible with wizard version
-            return selectedSdkVersion == null || wizardSdkVersion.isAtLeast(selectedSdkVersion);
+    public boolean hasCompatibleJavaVersion() {
+        if (this.sdk != null){
+            JavaSdkVersion wizardSdkVersion = JavaSdk.getInstance().getVersion(this.sdk);
+            if (wizardSdkVersion != null) {
+                LanguageLevel selectedLanguageLevel = LanguageLevel.parse(javaVersion);
+                JavaSdkVersion selectedSdkVersion =
+                        selectedLanguageLevel != null ? JavaSdkVersion.fromLanguageLevel(selectedLanguageLevel) : null;
+                // only if selected java version is compatible with wizard version
+                return selectedSdkVersion == null || wizardSdkVersion.isAtLeast(selectedSdkVersion);
+            }
         }
         return true;
     }
