@@ -3,3 +3,6 @@
 .qodana
 build
 sandbox
+
+### Mac files ###
+*.DS_Store
