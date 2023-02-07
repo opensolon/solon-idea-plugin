@@ -1,4 +1,4 @@
-package org.noear.plugin.idea.solon.initializr.step;
+package org.noear.solon.idea.plugin.initializr.step;
 
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
@@ -14,8 +14,8 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.NlsSafe;
 import com.intellij.ui.components.JBTextField;
 import org.jetbrains.annotations.NotNull;
-import org.noear.plugin.idea.solon.initializr.SolonCreationMetadata;
-import org.noear.plugin.idea.solon.initializr.SolonInitializrBuilder;
+import org.noear.solon.idea.plugin.initializr.SolonCreationMetadata;
+import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
 
 import javax.swing.*;
 

@@ -1,4 +1,4 @@
-package org.noear.plugin.idea.solon;
+package org.noear.solon.idea.plugin;
 
 import com.intellij.openapi.util.IconLoader;
 

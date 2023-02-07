@@ -1,4 +1,4 @@
-package org.noear.plugin.idea.solon.initializr;
+package org.noear.solon.idea.plugin.initializr;
 
 import com.intellij.ide.projectWizard.ProjectSettingsStep;
 import com.intellij.ide.util.projectWizard.*;
@@ -11,9 +11,9 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.noear.plugin.idea.solon.SolonIcons;
-import org.noear.plugin.idea.solon.initializr.step.ProjectDetailsStep;
-import org.noear.plugin.idea.solon.module.SolonModuleType;
+import org.noear.solon.idea.plugin.SolonIcons;
+import org.noear.solon.idea.plugin.initializr.step.ProjectDetailsStep;
+import org.noear.solon.idea.plugin.module.SolonModuleType;
 
 import javax.swing.*;
 import java.util.ArrayList;

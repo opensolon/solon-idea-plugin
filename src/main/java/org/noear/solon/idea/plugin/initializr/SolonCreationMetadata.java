@@ -1,4 +1,4 @@
-package org.noear.plugin.idea.solon.initializr;
+package org.noear.solon.idea.plugin.initializr;
 
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;
@@ -6,7 +6,7 @@ import com.intellij.openapi.projectRoots.JavaSdkVersion;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.pom.java.LanguageLevel;
-import org.noear.plugin.idea.solon.initializr.util.SolonInitializrUtil;
+import org.noear.solon.idea.plugin.initializr.util.SolonInitializrUtil;
 
 import javax.swing.filechooser.FileSystemView;
 import java.io.File;

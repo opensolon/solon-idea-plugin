@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>org.noear.plugin.idea.solon</id>
+    <id>org.noear.solon.idea.plugin</id>
     <name>Solon</name>
     <vendor>noear.org</vendor>
 
@@ -9,9 +9,9 @@
     <depends>com.intellij.uiDesigner</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <moduleType id="SOLON_MODULE_TYPE" implementationClass="org.noear.plugin.idea.solon.module.SolonModuleType"></moduleType>
+        <moduleType id="SOLON_MODULE_TYPE" implementationClass="org.noear.solon.idea.plugin.module.SolonModuleType"></moduleType>
         <moduleBuilder
-                builderClass="org.noear.plugin.idea.solon.initializr.SolonInitializrBuilder"
+                builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"
                 order="last"/>
     </extensions>
 </idea-plugin>

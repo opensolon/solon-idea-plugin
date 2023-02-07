@@ -1,4 +1,4 @@
-package org.noear.plugin.idea.solon.initializr.util;
+package org.noear.solon.idea.plugin.initializr.util;
 
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;

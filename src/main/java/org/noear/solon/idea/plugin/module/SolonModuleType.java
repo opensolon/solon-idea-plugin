@@ -1,10 +1,10 @@
-package org.noear.plugin.idea.solon.module;
+package org.noear.solon.idea.plugin.module;
 
 import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.module.ModuleTypeManager;
 import org.jetbrains.annotations.NotNull;
-import org.noear.plugin.idea.solon.SolonIcons;
-import org.noear.plugin.idea.solon.initializr.SolonInitializrBuilder;
+import org.noear.solon.idea.plugin.SolonIcons;
+import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
 
 import javax.swing.*;
 

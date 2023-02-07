@@ -1,9 +1,9 @@
-package org.noear.plugin.idea.solon.initializr.step;
+package org.noear.solon.idea.plugin.initializr.step;
 
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.Disposable;
-import org.noear.plugin.idea.solon.initializr.SolonInitializrBuilder;
+import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
 
 import javax.swing.*;
 
