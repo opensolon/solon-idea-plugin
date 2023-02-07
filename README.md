@@ -1,1 +1,1 @@
-# solon-initializr
+# solon-idea-plugin
