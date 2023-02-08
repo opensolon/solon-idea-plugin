@@ -2,7 +2,7 @@
 <idea-plugin>
     <id>org.noear.solon.idea.plugin</id>
     <name>Solon</name>
-    <vendor>noear.org</vendor>
+    <vendor url="https://gitee.com/noear" email="noear@live.cn">noear.org</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
