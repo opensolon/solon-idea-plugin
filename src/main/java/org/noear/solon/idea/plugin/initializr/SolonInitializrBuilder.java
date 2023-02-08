@@ -1,13 +1,19 @@
 package org.noear.solon.idea.plugin.initializr;
 
 import com.intellij.ide.projectWizard.ProjectSettingsStep;
-import com.intellij.ide.util.projectWizard.*;
+import com.intellij.ide.util.projectWizard.ModuleBuilder;
+import com.intellij.ide.util.projectWizard.ModuleWizardStep;
+import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.module.ModifiableModuleModel;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
-import com.intellij.openapi.module.StdModuleTypes;
+import com.intellij.openapi.module.ModuleWithNameAlreadyExists;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.roots.ModifiableRootModel;
+import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.NlsContexts;
+import org.jdom.JDOMException;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +22,7 @@ import org.noear.solon.idea.plugin.SolonIcons;
 import org.noear.solon.idea.plugin.initializr.step.ProjectDetailsStep;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +30,19 @@ public class SolonInitializrBuilder extends ModuleBuilder {
 
     private SolonCreationMetadata metadata;
 
-    public SolonCreationMetadata getMetadata() {
-        if (metadata == null){
-            metadata = new SolonCreationMetadata();
-        }
-        return metadata;
-    }
 
     @Override
     public void setupRootModel(@NotNull ModifiableRootModel modifiableRootModel) throws ConfigurationException {
-        super.setupRootModel(modifiableRootModel);
+        doAddContentEntry(modifiableRootModel);
+    }
+
+    @Override
+    public @NotNull Module createModule(@NotNull ModifiableModuleModel moduleModel) throws InvalidDataException, IOException, ModuleWithNameAlreadyExists, ConfigurationException, JDOMException {
+
+        // Create Maven Project
+        Module module = super.createModule(moduleModel);
+        return module;
+
     }
 
     @Override
@@ -79,8 +89,14 @@ public class SolonInitializrBuilder extends ModuleBuilder {
 
     @Override
     public ModuleType<?> getModuleType() {
-        return StdModuleTypes.JAVA;
+        return ModuleType.EMPTY;
     }
 
+    public SolonCreationMetadata getMetadata() {
+        if (metadata == null){
+            metadata = new SolonCreationMetadata();
+        }
+        return metadata;
+    }
 
 }
