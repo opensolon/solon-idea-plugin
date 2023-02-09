@@ -9,15 +9,21 @@
     <depends>com.intellij.uiDesigner</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+
+        <projectService
+                serviceInterface="org.noear.solon.idea.plugin.suggestion.service.SuggestionService"
+                serviceImplementation="org.noear.solon.idea.plugin.suggestion.service.SuggestionServiceImpl"/>
+
         <moduleBuilder
                 builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"
                 order="last"/>
+
     </extensions>
-    
+
     <applicationListeners>
-        <listener class="org.noear.solon.idea.plugin.suggestion.index.SuggestionIndex"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"></listener>
-        <listener class="org.noear.solon.idea.plugin.suggestion.index.SuggestionReIndex"
-                  topic="com.intellij.openapi.compiler.CompilationStatusListener"></listener>
+        <listener class="org.noear.solon.idea.plugin.suggestion.event.SuggestionIndexEvent"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+        <listener class="org.noear.solon.idea.plugin.suggestion.event.SuggestionReIndexEvent"
+                  topic="com.intellij.openapi.compiler.CompilationStatusListener"/>
     </applicationListeners>
 </idea-plugin>

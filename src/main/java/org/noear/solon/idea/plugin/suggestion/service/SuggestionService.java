@@ -1,7 +1,7 @@
 package org.noear.solon.idea.plugin.suggestion.service;
 
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
@@ -22,9 +22,9 @@ public interface SuggestionService {
 
     void reIndex(Project project);
 
-    void reindex(Project project, Module[] modules);
+    void reIndex(Project project, Module[] modules);
 
-    void reindex(Project project, Module module);
+    void reIndex(Project project, Module module);
 
     /**
      * findSuggestionsForQueryPrefix
