@@ -13,4 +13,11 @@
                 builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"
                 order="last"/>
     </extensions>
+    
+    <applicationListeners>
+        <listener class="org.noear.solon.idea.plugin.suggestion.index.SuggestionIndex"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"></listener>
+        <listener class="org.noear.solon.idea.plugin.suggestion.index.SuggestionReIndex"
+                  topic="com.intellij.openapi.compiler.CompilationStatusListener"></listener>
+    </applicationListeners>
 </idea-plugin>
