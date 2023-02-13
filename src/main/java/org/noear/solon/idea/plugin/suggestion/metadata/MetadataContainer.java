@@ -31,11 +31,21 @@ public class MetadataContainer {
     @Nullable
     private String fileUrl;
     private boolean archive;
-    /**
-     * If containerPath points to archive, then represents the timestamp of the archive
-     * else, represents the length of the generated metadata file
-     */
     private long marker;
+
+    public static Stream<String> getContainerArchiveOrFileRefs(VirtualFile fileContainer) {
+        if (fileContainer.getFileType() == FileTypes.ARCHIVE) {
+            return Stream.of(getContainerFile(fileContainer).getUrl());
+        } else {
+            VirtualFile metadataFile =
+                    findMetadataFile(fileContainer, SOLON_CONFIGURATION_METADATA_JSON);
+            if (metadataFile == null) {
+                return Stream.of(fileContainer.getUrl());
+            } else {
+                return Stream.of(metadataFile.getUrl());
+            }
+        }
+    }
 
     public static Collection<MetadataContainer> newInstances(VirtualFile fileContainer) {
         Collection<MetadataContainer> containerInfos = new ArrayList<>();
@@ -90,10 +100,6 @@ public class MetadataContainer {
         }
     }
 
-    public boolean isModified(MetadataContainer other) {
-        return this.marker != other.marker;
-    }
-
     public boolean containsMetadataFile() {
         return fileUrl != null;
     }
@@ -107,6 +113,15 @@ public class MetadataContainer {
         this.containerArchiveOrFileRef = containerArchiveOrFileRef;
     }
 
+    public long getMarker() {
+        return marker;
+    }
+
+    public MetadataContainer setMarker(long marker) {
+        this.marker = marker;
+        return this;
+    }
+
     public void setFileUrl(String fileUrl) {
         this.fileUrl = fileUrl;
     }
@@ -115,7 +130,19 @@ public class MetadataContainer {
         this.archive = archive;
     }
 
-    public void setMarker(long marker) {
-        this.marker = marker;
+    public String getContainerArchiveOrFileRef() {
+        return containerArchiveOrFileRef;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public boolean isArchive() {
+        return archive;
+    }
+
+    public boolean isModified(MetadataContainer other) {
+        return this.marker != other.marker;
     }
 }

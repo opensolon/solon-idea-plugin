@@ -7,37 +7,37 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderEnumerator;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import gnu.trove.THashMap;
-import org.apache.commons.collections4.Trie;
-import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.apache.commons.lang.time.StopWatch;
 import org.jetbrains.annotations.Nullable;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
 import org.noear.solon.idea.plugin.suggestion.metadata.MetadataContainer;
+import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataHints;
+import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataProperties;
+import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataProperty;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 
 public class SuggestionServiceImpl implements SuggestionService{
 
-    private final Map<String, Map<String, MetadataContainer>>
-            moduleNameToSeenContainerPathToContainerInfo;
-    /**
-     * Within the trie, all keys are stored in sanitised format to enable us find keys without worrying about hiphens, underscores, e.t.c in the keys themselves
-     */
-    private final Map<String, Trie<String, MetadataSuggestionNode>> moduleNameToRootSearchIndex;
+    private final Map<String, Map<String, MetadataContainer>> moduleNameToMetadataPathToMetadataContainer;
+
+    private final Map<String, SolonConfigurationMetadataProperties> propertiesSearchIndex;
+    private final Map<String, SolonConfigurationMetadataHints> hintsSearchIndex;
+
     private Future<?> currentExecution;
     private volatile boolean indexingInProgress;
 
     public SuggestionServiceImpl() {
-        moduleNameToSeenContainerPathToContainerInfo = new THashMap<>();
-        moduleNameToRootSearchIndex = new THashMap<>();
+        moduleNameToMetadataPathToMetadataContainer = new HashMap<>();
+        propertiesSearchIndex = new HashMap<>();
+        hintsSearchIndex = new HashMap<>();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class SuggestionServiceImpl implements SuggestionService{
                         StopWatch moduleTimer = new StopWatch();
                         moduleTimer.start();
                         try {
-                            reIndexModule(emptyList(), emptyList(), module);
+                            reIndexModule(module);
                         } finally {
                             moduleTimer.stop();
                             LoggerUtil.debug(this.getClass(), logger -> logger.debug(
@@ -95,17 +95,10 @@ public class SuggestionServiceImpl implements SuggestionService{
 
 
 
-    private void reIndexModule(List<MetadataContainer> newProjectSourcesToProcess,
-                               List<MetadataContainer> projectContainersToRemove, Module module) {
-        Map<String, MetadataContainer> moduleSeenContainerPathToSeenContainerInfo =
-                moduleNameToSeenContainerPathToContainerInfo
-                        .computeIfAbsent(module.getName(), k -> new THashMap<>());
-        Trie<String, MetadataSuggestionNode> moduleRootSearchIndex =
-                moduleNameToRootSearchIndex.get(module.getName());
-        if (moduleRootSearchIndex == null) {
-            moduleRootSearchIndex = new PatriciaTrie<>();
-            moduleNameToRootSearchIndex.put(module.getName(), moduleRootSearchIndex);
-        }
+    private void reIndexModule(Module module) {
+        Map<String, MetadataContainer> moduleSeenMetadataPathToSeenMetadataContainer =
+                moduleNameToMetadataPathToMetadataContainer
+                        .computeIfAbsent(module.getName(), k -> new HashMap<>());
 
         /**
          * Order entries include SDK, libraries and other modules the module uses.
@@ -115,16 +108,65 @@ public class SuggestionServiceImpl implements SuggestionService{
 
         List<MetadataContainer> newModuleContainersToProcess =
                 computeNewContainersToProcess(moduleOrderEnumerator,
-                        moduleSeenContainerPathToSeenContainerInfo);
-        newModuleContainersToProcess.addAll(newProjectSourcesToProcess);
+                        moduleSeenMetadataPathToSeenMetadataContainer);
 
         List<MetadataContainer> moduleContainersToRemove =
                 computeContainersToRemove(moduleOrderEnumerator,
-                        moduleSeenContainerPathToSeenContainerInfo);
-        moduleContainersToRemove.addAll(projectContainersToRemove);
+                        moduleSeenMetadataPathToSeenMetadataContainer);
 
         processContainers(module, newModuleContainersToProcess, moduleContainersToRemove,
-                moduleSeenContainerPathToSeenContainerInfo, moduleRootSearchIndex);
+                moduleSeenMetadataPathToSeenMetadataContainer, propertiesSearchIndex, hintsSearchIndex);
+    }
+
+    private List<MetadataContainer> computeNewContainersToProcess(OrderEnumerator orderEnumerator,
+                                                                  Map<String, MetadataContainer> moduleSeenMetadataPathToSeenMetadataContainer) {
+        List<MetadataContainer> containersToProcess = new ArrayList<>();
+        for (VirtualFile metadataFileContainer : orderEnumerator.recursively().classes().getRoots()) {
+            Collection<MetadataContainer> metadataContainerInfos =
+                    MetadataContainer.newInstances(metadataFileContainer);
+            for (MetadataContainer metadataContainerInfo : metadataContainerInfos) {
+
+                boolean seenBefore = moduleSeenMetadataPathToSeenMetadataContainer
+                        .containsKey(metadataContainerInfo.getContainerArchiveOrFileRef());
+
+                boolean updatedSinceLastSeen = false;
+                if (seenBefore) {
+                    MetadataContainer seenMetadataContainerInfo = moduleSeenMetadataPathToSeenMetadataContainer
+                            .get(metadataContainerInfo.getContainerArchiveOrFileRef());
+                    updatedSinceLastSeen = metadataContainerInfo.isModified(seenMetadataContainerInfo);
+                    if (updatedSinceLastSeen) {
+                        LoggerUtil.debug(this.getClass(), (logger) -> logger.debug("Container seems to have been updated. Previous version: "
+                                + seenMetadataContainerInfo + "; Newer version: " + metadataContainerInfo));
+                    }
+                }
+
+                boolean looksFresh = !seenBefore || updatedSinceLastSeen;
+                boolean processMetadata = looksFresh && metadataContainerInfo.containsMetadataFile();
+                if (processMetadata) {
+                    containersToProcess.add(metadataContainerInfo);
+                }
+
+                if (looksFresh) {
+                    moduleSeenMetadataPathToSeenMetadataContainer
+                            .put(metadataContainerInfo.getContainerArchiveOrFileRef(), metadataContainerInfo);
+                }
+            }
+        }
+
+        if (containersToProcess.size() == 0) {
+            LoggerUtil.debug(this.getClass(), logger -> logger.debug("No (new)metadata files to index"));
+        }
+        return containersToProcess;
+    }
+
+    private List<MetadataContainer> computeContainersToRemove(OrderEnumerator orderEnumerator,
+                                                              Map<String, MetadataContainer> moduleSeenMetadataPathToSeenMetadataContainer) {
+        Set<String> newContainerPaths = Arrays.stream(orderEnumerator.recursively().classes().getRoots())
+                .flatMap(MetadataContainer::getContainerArchiveOrFileRefs).collect(Collectors.toSet());
+        Set<String> knownContainerPathSet = new HashSet<>(moduleSeenMetadataPathToSeenMetadataContainer.keySet());
+        knownContainerPathSet.removeAll(newContainerPaths);
+        return knownContainerPathSet.stream().map(moduleSeenMetadataPathToSeenMetadataContainer::get)
+                .collect(Collectors.toList());
     }
 
     @Override
