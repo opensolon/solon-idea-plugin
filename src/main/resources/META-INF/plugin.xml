@@ -6,13 +6,23 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
-    <depends>com.intellij.uiDesigner</depends>
+    <depends>com.intellij.properties</depends>
 
     <extensions defaultExtensionNs="com.intellij">
 
         <projectService
                 serviceInterface="org.noear.solon.idea.plugin.suggestion.service.SuggestionService"
                 serviceImplementation="org.noear.solon.idea.plugin.suggestion.service.SuggestionServiceImpl"/>
+
+        <fileType name="solon-properties-file"
+                  implementationClass="org.noear.solon.idea.plugin.suggestion.filetype.SolonPropertiesFileType"
+                  fieldName="INSTANCE"
+                  fileNames="app.properties"
+                  patterns="app-*.properties"/>
+
+        <completion.contributor
+                language="Properties"
+                implementationClass="org.noear.solon.idea.plugin.suggestion.completion.PropertiesCompletionContributor"/>
 
         <moduleBuilder
                 builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"

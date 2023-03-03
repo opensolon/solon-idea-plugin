@@ -24,6 +24,8 @@ repositories {
 dependencies{
     // https://github.com/alibaba/fastjson2
     implementation("com.alibaba.fastjson2:fastjson2:2.0.23")
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
+    implementation("org.apache.commons:commons-collections4:4.4")
 }
 
 // Set the JVM language level used to build the project. Use Java 11 for 2020.3+, and Java 17 for 2022.2+.

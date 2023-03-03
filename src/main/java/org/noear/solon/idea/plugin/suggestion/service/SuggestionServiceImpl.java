@@ -1,43 +1,49 @@
 package org.noear.solon.idea.plugin.suggestion.service;
 
+import com.alibaba.fastjson2.JSON;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElement;
+import org.apache.commons.collections4.Trie;
+import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.apache.commons.lang.time.StopWatch;
 import org.jetbrains.annotations.Nullable;
+import org.noear.solon.idea.plugin.SolonIcons;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
 import org.noear.solon.idea.plugin.suggestion.metadata.MetadataContainer;
-import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataHints;
-import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataProperties;
+import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadata;
+import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataHint;
+import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataHintValue;
 import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataProperty;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyList;
 
 public class SuggestionServiceImpl implements SuggestionService{
 
-    private final Map<String, Map<String, MetadataContainer>> moduleNameToMetadataPathToMetadataContainer;
-
-    private final Map<String, SolonConfigurationMetadataProperties> propertiesSearchIndex;
-    private final Map<String, SolonConfigurationMetadataHints> hintsSearchIndex;
+    private final Trie<String, SolonConfigurationMetadataProperty> propertiesSearchIndex;
+    private final Trie<String, SolonConfigurationMetadataHint> hintsSearchIndex;
 
     private Future<?> currentExecution;
     private volatile boolean indexingInProgress;
 
     public SuggestionServiceImpl() {
-        moduleNameToMetadataPathToMetadataContainer = new HashMap<>();
-        propertiesSearchIndex = new HashMap<>();
-        hintsSearchIndex = new HashMap<>();
+        this.propertiesSearchIndex = new PatriciaTrie<>();
+        this.hintsSearchIndex = new PatriciaTrie<>();
+    }
+
+    private void clearSearchIndex(){
+        this.propertiesSearchIndex.clear();
+        this.hintsSearchIndex.clear();
     }
 
     @Override
@@ -69,13 +75,14 @@ public class SuggestionServiceImpl implements SuggestionService{
                 indexingInProgress = true;
                 StopWatch timer = new StopWatch();
                 timer.start();
+                clearSearchIndex();
                 try {
                     for (Module module : modules) {
                         LoggerUtil.debug(this.getClass(), logger -> logger.debug("--> Indexing requested for module " + module.getName()));
                         StopWatch moduleTimer = new StopWatch();
                         moduleTimer.start();
                         try {
-                            reIndexModule(module);
+                            loadModuleSearchIndex(module);
                         } finally {
                             moduleTimer.stop();
                             LoggerUtil.debug(this.getClass(), logger -> logger.debug(
@@ -95,60 +102,50 @@ public class SuggestionServiceImpl implements SuggestionService{
 
 
 
-    private void reIndexModule(Module module) {
-        Map<String, MetadataContainer> moduleSeenMetadataPathToSeenMetadataContainer =
-                moduleNameToMetadataPathToMetadataContainer
-                        .computeIfAbsent(module.getName(), k -> new HashMap<>());
-
+    private void loadModuleSearchIndex(Module module) {
         /**
          * Order entries include SDK, libraries and other modules the module uses.
          * https://plugins.jetbrains.com/docs/intellij/module.html#how-do-i-get-dependencies-and-classpath-of-a-module
          */
         OrderEnumerator moduleOrderEnumerator = OrderEnumerator.orderEntries(module);
 
-        List<MetadataContainer> newModuleContainersToProcess =
-                computeNewContainersToProcess(moduleOrderEnumerator,
-                        moduleSeenMetadataPathToSeenMetadataContainer);
+        List<MetadataContainer> containersToProcess =
+                computeNewContainersToProcess(moduleOrderEnumerator);
 
-        List<MetadataContainer> moduleContainersToRemove =
-                computeContainersToRemove(moduleOrderEnumerator,
-                        moduleSeenMetadataPathToSeenMetadataContainer);
-
-        processContainers(module, newModuleContainersToProcess, moduleContainersToRemove,
-                moduleSeenMetadataPathToSeenMetadataContainer, propertiesSearchIndex, hintsSearchIndex);
+        processContainers(module, containersToProcess);
     }
 
-    private List<MetadataContainer> computeNewContainersToProcess(OrderEnumerator orderEnumerator,
-                                                                  Map<String, MetadataContainer> moduleSeenMetadataPathToSeenMetadataContainer) {
+    private void processContainers(Module module, List<MetadataContainer> containersToProcess) {
+        for (MetadataContainer metadataContainer : containersToProcess) {
+            String metadataFilePath = metadataContainer.getFileUrl();
+            try (InputStream inputStream = metadataContainer.getMetadataFile().getInputStream()){
+                SolonConfigurationMetadata solonConfigurationMetadata = JSON.parseObject(new BufferedReader(new InputStreamReader(inputStream)), SolonConfigurationMetadata.class);
+                buildMetadataHierarchy(module, solonConfigurationMetadata);
+            }catch (IOException e){
+                LoggerUtil.getLogger(this.getClass()).error("Exception encountered while processing metadata file: " + metadataFilePath, e);
+            }
+        }
+    }
+
+    private void buildMetadataHierarchy(Module module, SolonConfigurationMetadata solonConfigurationMetadata) {
+        for (SolonConfigurationMetadataProperty property : solonConfigurationMetadata.getProperties()) {
+            this.propertiesSearchIndex.put(property.getName(), property);
+        }
+        for (SolonConfigurationMetadataHint hint : solonConfigurationMetadata.getHints()) {
+            this.hintsSearchIndex.put(hint.getName(), hint);
+        }
+
+    }
+
+    private List<MetadataContainer> computeNewContainersToProcess(OrderEnumerator orderEnumerator) {
         List<MetadataContainer> containersToProcess = new ArrayList<>();
         for (VirtualFile metadataFileContainer : orderEnumerator.recursively().classes().getRoots()) {
             Collection<MetadataContainer> metadataContainerInfos =
                     MetadataContainer.newInstances(metadataFileContainer);
             for (MetadataContainer metadataContainerInfo : metadataContainerInfos) {
-
-                boolean seenBefore = moduleSeenMetadataPathToSeenMetadataContainer
-                        .containsKey(metadataContainerInfo.getContainerArchiveOrFileRef());
-
-                boolean updatedSinceLastSeen = false;
-                if (seenBefore) {
-                    MetadataContainer seenMetadataContainerInfo = moduleSeenMetadataPathToSeenMetadataContainer
-                            .get(metadataContainerInfo.getContainerArchiveOrFileRef());
-                    updatedSinceLastSeen = metadataContainerInfo.isModified(seenMetadataContainerInfo);
-                    if (updatedSinceLastSeen) {
-                        LoggerUtil.debug(this.getClass(), (logger) -> logger.debug("Container seems to have been updated. Previous version: "
-                                + seenMetadataContainerInfo + "; Newer version: " + metadataContainerInfo));
-                    }
-                }
-
-                boolean looksFresh = !seenBefore || updatedSinceLastSeen;
-                boolean processMetadata = looksFresh && metadataContainerInfo.containsMetadataFile();
+                boolean processMetadata = metadataContainerInfo.containsMetadataFile();
                 if (processMetadata) {
                     containersToProcess.add(metadataContainerInfo);
-                }
-
-                if (looksFresh) {
-                    moduleSeenMetadataPathToSeenMetadataContainer
-                            .put(metadataContainerInfo.getContainerArchiveOrFileRef(), metadataContainerInfo);
                 }
             }
         }
@@ -159,18 +156,54 @@ public class SuggestionServiceImpl implements SuggestionService{
         return containersToProcess;
     }
 
-    private List<MetadataContainer> computeContainersToRemove(OrderEnumerator orderEnumerator,
-                                                              Map<String, MetadataContainer> moduleSeenMetadataPathToSeenMetadataContainer) {
-        Set<String> newContainerPaths = Arrays.stream(orderEnumerator.recursively().classes().getRoots())
-                .flatMap(MetadataContainer::getContainerArchiveOrFileRefs).collect(Collectors.toSet());
-        Set<String> knownContainerPathSet = new HashSet<>(moduleSeenMetadataPathToSeenMetadataContainer.keySet());
-        knownContainerPathSet.removeAll(newContainerPaths);
-        return knownContainerPathSet.stream().map(moduleSeenMetadataPathToSeenMetadataContainer::get)
-                .collect(Collectors.toList());
+    @Override
+    public @Nullable List<LookupElementBuilder> findPropertySuggestionsForQueryPrefix(String queryWithDotDelimitedPrefixes) {
+        SortedMap<String, SolonConfigurationMetadataProperty> sortedMap = this.propertiesSearchIndex.prefixMap(queryWithDotDelimitedPrefixes);
+        List<LookupElementBuilder> builders = new ArrayList<>();
+        for (Map.Entry<String, SolonConfigurationMetadataProperty> entry : sortedMap.entrySet()) {
+            builders.add(toLookupElementBuilder(entry.getValue()));
+        }
+        return builders;
     }
 
     @Override
-    public @Nullable List<LookupElementBuilder> findSuggestionsForQueryPrefix(Project project, Module module, FileType fileType, PsiElement element, @Nullable List<String> ancestralKeys, String queryWithDotDelimitedPrefixes, @Nullable Set<String> siblingsToExclude) {
-        return null;
+    public @Nullable List<LookupElementBuilder> findHintSuggestionsForQueryPrefix(String property, String queryWithDotDelimitedPrefixes) {
+        SolonConfigurationMetadataHint hint = this.hintsSearchIndex.get(property);
+        if (hint == null){
+            return new ArrayList<>();
+        }
+        List<LookupElementBuilder> builders = new ArrayList<>();
+        for (SolonConfigurationMetadataHintValue hintValue : hint.getValues()) {
+            if (hintValue.getValue() == null) {continue;}
+            builders.add(toLookupElementBuilder(hintValue));
+        }
+        return builders;
+    }
+
+    private LookupElementBuilder toLookupElementBuilder(SolonConfigurationMetadataHintValue hintValue) {
+        LookupElementBuilder builder = LookupElementBuilder.create(hintValue.getValue());
+        if (hintValue.getDescription() != null){
+            builder.withTypeText(hintValue.getDescription(), true);
+        }
+        SolonConfigurationMetadataProperty property = this.propertiesSearchIndex.get(hintValue.getValue());
+        if (property != null && property.getDefaultValue() != null){
+            if (hintValue.getValue().toString().equals(property.getDefaultValue().toString())) {
+                builder.bold();
+            }
+        }
+        return builder;
+    }
+
+    private LookupElementBuilder toLookupElementBuilder(SolonConfigurationMetadataProperty property) {
+        LookupElementBuilder builder = LookupElementBuilder.create(property.getName());
+        if (property.getDescription() != null){
+            builder.withTypeText(property.getDescription(),true);
+        }
+        return builder;
+    }
+
+    @Override
+    public boolean canProvideSuggestions() {
+        return this.propertiesSearchIndex.size() + this.hintsSearchIndex.size() > 0;
     }
 }
