@@ -7,6 +7,13 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.properties</depends>
+    <depends config-file="maven.xml" optional="true">org.jetbrains.idea.maven</depends>
+    <depends config-file="gradle.xml" optional="true">com.intellij.gradle</depends>
+
+    <extensionPoints>
+        <extensionPoint qualifiedName="solon.initializr.moduleBuilderPostProcessor"
+                        interface="org.noear.solon.idea.plugin.initializr.processor.ModuleBuilderPostProcessor"/>
+    </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
 

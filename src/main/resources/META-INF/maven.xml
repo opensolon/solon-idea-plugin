@@ -1,0 +1,8 @@
+<idea-plugin>
+
+    <extensions defaultExtensionNs="solon.initializr">
+        <moduleBuilderPostProcessor
+                implementation="org.noear.solon.idea.plugin.initializr.processor.MavenModuleBuilderPostProcessor"/>
+    </extensions>
+
+</idea-plugin>

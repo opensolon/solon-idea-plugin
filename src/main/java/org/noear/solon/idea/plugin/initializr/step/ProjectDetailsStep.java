@@ -4,7 +4,7 @@ import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.ConfigurationException;
-import org.noear.solon.idea.plugin.initializr.SolonCreationMetadata;
+import org.noear.solon.idea.plugin.initializr.metadata.SolonCreationMetadata;
 import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
 
 import javax.swing.*;
