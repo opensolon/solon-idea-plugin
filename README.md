@@ -15,11 +15,16 @@
 - [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+Solon for IntelliJ IDEA plugin，Features:
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
+* Provides Solon Initializr New Project wizard.
+* Autocompletion for Properties configuration files.
 
-To keep everything working, do not remove `<!-- ... -->` sections. 
+
+Solon 的 IntelliJ IDEA 插件，特性:
+
+* 提供新建项目向导
+* 自动完成 .properties 配置文件的提示
 <!-- Plugin description end -->
 
 ## Installation
