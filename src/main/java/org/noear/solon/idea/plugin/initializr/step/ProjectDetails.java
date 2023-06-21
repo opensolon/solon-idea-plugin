@@ -2,37 +2,25 @@ package org.noear.solon.idea.plugin.initializr.step;
 
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;
-import com.intellij.lang.properties.psi.impl.PropertyImpl;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
-import com.intellij.openapi.observable.properties.GraphProperty;
-import com.intellij.openapi.observable.properties.GraphPropertyImpl;
-import com.intellij.openapi.observable.properties.PropertyGraph;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.projectRoots.*;
+import com.intellij.openapi.projectRoots.JavaSdk;
+import com.intellij.openapi.projectRoots.JavaSdkType;
+import com.intellij.openapi.projectRoots.JavaSdkVersion;
 import com.intellij.openapi.roots.ui.configuration.JdkComboBox;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel;
-import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.NlsSafe;
 import com.intellij.ui.components.JBTextField;
-import com.intellij.ui.layout.ButtonSelectorAction;
-import com.intellij.ui.layout.ButtonSelectorToolbar;
 import org.jetbrains.annotations.NotNull;
-import org.noear.solon.idea.plugin.initializr.metadata.LanguageOption;
-import org.noear.solon.idea.plugin.initializr.metadata.PackagingOption;
-import org.noear.solon.idea.plugin.initializr.metadata.SolonCreationMetadata;
 import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
-import org.noear.solon.idea.plugin.initializr.metadata.TypeOption;
-import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadataOption;
+import org.noear.solon.idea.plugin.initializr.metadata.SolonCreationMetadata;
 import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadataOptionItem;
 
 import javax.swing.*;
-
-import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
@@ -53,12 +41,12 @@ public class ProjectDetails {
     private JBTextField TextField_PackageName;
     private JCheckBox CheckBox_InitGit;
     private JdkComboBox ComboBox_JDK;
-    private ButtonSelectorToolbar ButtonSelectorToolbar_Language;
-    private ButtonSelectorToolbar ButtonSelectorToolbar_Type;
-    private ButtonSelectorToolbar ButtonSelectorToolbar_Packaging;
     private JComboBox<SolonMetadataOptionItem> ComboBox_SolonVer;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Archetype;
     private JComboBox<SolonMetadataOptionItem> ComboBox_JavaVersion;
+    private JComboBox<SolonMetadataOptionItem> ComboBox_Language;
+    private JComboBox<SolonMetadataOptionItem> ComboBox_Type;
+    private JComboBox<SolonMetadataOptionItem> ComboBox_Packaging;
 
     private boolean isNameChanged = false;
     private boolean isGroupChanged = false;
@@ -73,12 +61,14 @@ public class ProjectDetails {
 
         // Init and select default jdk
         if (ComboBox_JDK != null && ComboBox_JDK.getItemCount() > 0 && !ComboBox_JDK.isProjectJdkSelected()){
+
             ComboBox_JDK.setSelectedIndex(0);
             this.metadata.setSdk(ComboBox_JDK.getSelectedJdk());
+
+            ComboBox_JDK.addActionListener(e -> {
+                this.metadata.setSdk(ComboBox_JDK.getSelectedJdk());
+            });
         }
-        ComboBox_JDK.addActionListener(e -> {
-            this.metadata.setSdk(ComboBox_JDK.getSelectedJdk());
-        });
 
         TextField_Name.setText(this.metadata.getName());
         TextField_Name.addCaretListener(e -> {
@@ -119,6 +109,21 @@ public class ProjectDetails {
             this.metadata.setJavaVersion(ComboBox_JavaVersion.getItemAt(ComboBox_JavaVersion.getSelectedIndex()).getValue());
         });
 
+        ComboBox_Language.setSelectedItem(this.metadata.getLanguage());
+        ComboBox_Language.addActionListener(e -> {
+            this.metadata.setLanguage(ComboBox_Language.getItemAt(ComboBox_Language.getSelectedIndex()).getValue());
+        });
+
+        ComboBox_Type.setSelectedItem(this.metadata.getType());
+        ComboBox_Type.addActionListener(e -> {
+            this.metadata.setType(ComboBox_Type.getItemAt(ComboBox_Type.getSelectedIndex()).getValue());
+        });
+
+        ComboBox_Packaging.setSelectedItem(this.metadata.getPackaging());
+        ComboBox_Packaging.addActionListener(e -> {
+            this.metadata.setPackaging(ComboBox_Packaging.getItemAt(ComboBox_Packaging.getSelectedIndex()).getValue());
+        });
+
         CheckBox_InitGit.setSelected(this.metadata.isInitGit());
         CheckBox_InitGit.addActionListener(e -> {
             this.metadata.setInitGit(CheckBox_InitGit.isSelected());
@@ -139,9 +144,21 @@ public class ProjectDetails {
             for (SolonMetadataOptionItem option : metadata.getInitMetadata().getJavaVer().getOptions()) {
                 ComboBox_JavaVersion.addItem(option);
             }
+            for (SolonMetadataOptionItem option : metadata.getInitMetadata().getLanguage().getOptions()) {
+                ComboBox_Language.addItem(option);
+            }
+            for (SolonMetadataOptionItem option : metadata.getInitMetadata().getProject().getOptions()) {
+                ComboBox_Type.addItem(option);
+            }
+            for (SolonMetadataOptionItem option : metadata.getInitMetadata().getPackaging().getOptions()) {
+                ComboBox_Packaging.addItem(option);
+            }
             ComboBox_SolonVer.setSelectedItem(metadata.getInitMetadata().getSolonVer().getByValue(metadata.getInitMetadata().getSolonVer().getDefaultValue()));
             ComboBox_Archetype.setSelectedItem(metadata.getInitMetadata().getDependencies().getByValue(metadata.getInitMetadata().getDependencies().getDefaultValue()));
             ComboBox_JavaVersion.setSelectedItem(metadata.getInitMetadata().getJavaVer().getByValue(metadata.getInitMetadata().getJavaVer().getDefaultValue()));
+            ComboBox_Language.setSelectedItem(metadata.getInitMetadata().getLanguage().getByValue(metadata.getInitMetadata().getLanguage().getDefaultValue()));
+            ComboBox_Type.setSelectedItem(metadata.getInitMetadata().getProject().getByValue(metadata.getInitMetadata().getProject().getDefaultValue()));
+            ComboBox_Packaging.setSelectedItem(metadata.getInitMetadata().getPackaging().getByValue(metadata.getInitMetadata().getPackaging().getDefaultValue()));
         }
 
         TextField_Location.addBrowseFolderListener(null, null, context.getProject(), FileChooserDescriptorFactory.createSingleFolderDescriptor(), new TextComponentAccessor<JTextField>() {
@@ -171,52 +188,6 @@ public class ProjectDetails {
         sdksModel.reset(project);
 
         ComboBox_JDK = new JdkComboBox(project, sdksModel, sdk -> sdk instanceof JavaSdkType, null, null, null);
-
-        GraphProperty<LanguageOption> languageProperty = new GraphPropertyImpl<>(new PropertyGraph(), () -> LanguageOption.JAVA);
-        ButtonSelectorToolbar_Language = new ButtonSelectorToolbar(
-                "LanguageSelector",
-                new DefaultActionGroup(List.of(
-                    new ButtonSelectorAction<>(LanguageOption.JAVA, languageProperty, LanguageOption.JAVA.getLabel()),
-                    new ButtonSelectorAction<>(LanguageOption.KOTLIN, languageProperty, LanguageOption.KOTLIN.getLabel()),
-                    new ButtonSelectorAction<>(LanguageOption.GROOVY, languageProperty, LanguageOption.GROOVY.getLabel())
-                )),
-                true
-        );
-        languageProperty.afterChange(option -> {
-            this.metadata.setLanguage(option.getValue());
-            return null;
-        });
-
-        GraphProperty<TypeOption> typeProperty = new GraphPropertyImpl<>(new PropertyGraph(), () -> TypeOption.MAVEN);
-        ButtonSelectorToolbar_Type = new ButtonSelectorToolbar(
-                "TypeSelector",
-                new DefaultActionGroup(List.of(
-                        new ButtonSelectorAction<>(TypeOption.MAVEN, typeProperty, TypeOption.MAVEN.getLabel()),
-                        new ButtonSelectorAction<>(TypeOption.GRADLE_GROOVY, typeProperty, TypeOption.GRADLE_GROOVY.getLabel()),
-                        new ButtonSelectorAction<>(TypeOption.GRADLE_KOTLIN, typeProperty, TypeOption.GRADLE_KOTLIN.getLabel())
-                )),
-                true
-        );
-        typeProperty.afterChange(option -> {
-            this.metadata.setType(option.getValue());
-            return null;
-        });
-
-        GraphProperty<PackagingOption> packagingProperty = new GraphPropertyImpl<>(new PropertyGraph(), () -> PackagingOption.JAR);
-        ButtonSelectorToolbar_Packaging = new ButtonSelectorToolbar(
-                "PackagingSelector",
-                new DefaultActionGroup(List.of(
-                        new ButtonSelectorAction<>(PackagingOption.JAR, packagingProperty, PackagingOption.JAR.getLabel()),
-                        new ButtonSelectorAction<>(PackagingOption.WAR, packagingProperty, PackagingOption.WAR.getLabel())
-                )),
-                true
-        );
-        packagingProperty.afterChange(option -> {
-            this.metadata.setPackaging(option.getValue());
-            return null;
-        });
-
-
 
     }
 

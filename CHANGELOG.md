@@ -2,6 +2,12 @@
 
 # Solon Changelog
 
-## [Unreleased]
+## [0.0.1-M2]
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+- Provides Solon Initializr New Project wizard.
+- Autocompletion for Properties configuration files.
+
+## [0.0.1-M1]
+### Added
+- Provides Solon Initializr New Project wizard.
+- Autocompletion for Properties configuration files.

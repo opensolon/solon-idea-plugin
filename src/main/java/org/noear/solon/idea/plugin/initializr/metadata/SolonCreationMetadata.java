@@ -32,9 +32,9 @@ public class SolonCreationMetadata {
 
     private boolean isInitGit = false;
 
-    private String language = "java";
+    private String language;
 
-    private String type = "maven";
+    private String type;
 
     private String groupId;
 
@@ -46,7 +46,7 @@ public class SolonCreationMetadata {
 
     private String javaVersion;
 
-    private String packaging = "jar";
+    private String packaging;
 
     private String solonVer;
 
@@ -255,5 +255,8 @@ public class SolonCreationMetadata {
         setSolonVer(solonMetadata.getSolonVer().getDefaultValue());
         setDependency(solonMetadata.getDependencies().getDefaultValue());
         setDescription(solonMetadata.getDescription().getDefaultValue());
+        setLanguage(solonMetadata.getLanguage().getDefaultValue());
+        setType(solonMetadata.getProject().getDefaultValue());
+        setPackaging(solonMetadata.getPackaging().getDefaultValue());
     }
 }

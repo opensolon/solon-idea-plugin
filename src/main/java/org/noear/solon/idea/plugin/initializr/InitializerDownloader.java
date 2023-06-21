@@ -7,6 +7,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.newvfs.RefreshQueue;
+import com.intellij.util.PathUtil;
 import com.intellij.util.io.HttpRequests;
 import com.intellij.util.io.ZipUtil;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static java.util.Objects.requireNonNull;
 
@@ -53,7 +56,7 @@ public class InitializerDownloader {
         indicator.setText("Please wait ...");
         File targetExtractionDir = new File(requireNonNull(builder.getContentEntryPath()));
         if (download.zip) {
-            ZipUtil.extract(tempFile, targetExtractionDir, null);
+            ZipUtil.extract(Path.of(tempFile.getAbsolutePath()), Path.of(targetExtractionDir.getAbsolutePath()), null);
         } else {
             FileUtil.copy(tempFile, new File(targetExtractionDir, download.fileName));
         }

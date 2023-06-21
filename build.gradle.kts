@@ -23,7 +23,7 @@ repositories {
 }
 dependencies{
     // https://github.com/alibaba/fastjson2
-    implementation("com.alibaba.fastjson2:fastjson2:2.0.23")
+    implementation("com.alibaba.fastjson2:fastjson2:2.0.34")
     // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
     implementation("org.apache.commons:commons-collections4:4.4")
 }

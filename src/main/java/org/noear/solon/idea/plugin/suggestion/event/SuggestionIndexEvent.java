@@ -2,6 +2,7 @@ package org.noear.solon.idea.plugin.suggestion.event;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManagerListener;
+import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
 import org.noear.solon.idea.plugin.suggestion.service.SuggestionService;
@@ -9,14 +10,13 @@ import org.noear.solon.idea.plugin.suggestion.service.SuggestionService;
 import java.io.IOException;
 
 
-public class SuggestionIndexEvent implements ProjectManagerListener {
+public class SuggestionIndexEvent implements StartupActivity {
 
     /**
      * Indexing the suggestion when project opened.
      */
     @Override
-    public void projectOpened(@NotNull Project project) {
-
+    public void runActivity(@NotNull Project project) {
         SuggestionService service = SuggestionService.getInstance(project);
 
         try {
@@ -27,6 +27,6 @@ public class SuggestionIndexEvent implements ProjectManagerListener {
         } finally {
             LoggerUtil.debug(this.getClass(), logger -> logger.debug("Indexing complete for project " + project.getName()));
         }
-
     }
+
 }
