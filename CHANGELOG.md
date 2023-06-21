@@ -2,6 +2,11 @@
 
 # Solon Changelog
 
+## [0.0.1-M3]
+### Added
+- Provides Solon Initializr New Project wizard.
+- Autocompletion for Properties configuration files.
+
 ## [0.0.1-M2]
 ### Added
 - Provides Solon Initializr New Project wizard.
