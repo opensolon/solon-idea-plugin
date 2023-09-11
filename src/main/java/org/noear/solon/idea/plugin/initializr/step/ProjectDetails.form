@@ -203,7 +203,6 @@
           <focusCycleRoot value="false"/>
           <focusTraversalPolicyProvider value="false"/>
           <horizontalTextPosition value="10"/>
-          <icon value="general/contextHelp.png"/>
           <iconTextGap value="4"/>
           <labelFor value=""/>
           <opaque value="false"/>
