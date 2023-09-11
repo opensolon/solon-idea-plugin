@@ -1,6 +1,7 @@
 package org.noear.solon.idea.plugin.initializr.metadata;
 
 import com.alibaba.fastjson2.JSON;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.projectRoots.JavaSdk;
 import com.intellij.openapi.projectRoots.JavaSdkVersion;
@@ -11,7 +12,6 @@ import com.intellij.util.io.HttpRequests;
 import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadata;
 import org.noear.solon.idea.plugin.initializr.util.SolonInitializrUtil;
 
-import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.io.IOException;
 
@@ -28,7 +28,7 @@ public class SolonCreationMetadata {
 
     private String name;
 
-    private String location = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
+    private String location = ProjectUtil.getBaseDir();
 
     private boolean isInitGit = false;
 

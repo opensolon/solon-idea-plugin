@@ -2,7 +2,6 @@ package org.noear.solon.idea.plugin.initializr.step;
 
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;
-import com.intellij.lang.properties.psi.impl.PropertyImpl;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.observable.properties.GraphProperty;
@@ -14,7 +13,6 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.projectRoots.*;
 import com.intellij.openapi.roots.ui.configuration.JdkComboBox;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel;
-import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.NlsSafe;
@@ -27,8 +25,8 @@ import org.noear.solon.idea.plugin.initializr.metadata.PackagingOption;
 import org.noear.solon.idea.plugin.initializr.metadata.SolonCreationMetadata;
 import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
 import org.noear.solon.idea.plugin.initializr.metadata.TypeOption;
-import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadataOption;
 import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadataOptionItem;
+import org.noear.solon.idea.plugin.initializr.util.StringUtils;
 
 import javax.swing.*;
 
@@ -59,20 +57,22 @@ public class ProjectDetails {
     private JComboBox<SolonMetadataOptionItem> ComboBox_SolonVer;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Archetype;
     private JComboBox<SolonMetadataOptionItem> ComboBox_JavaVersion;
+    private JLabel LocationTips;
 
+    private boolean TipsLock = false;
     private boolean isNameChanged = false;
     private boolean isGroupChanged = false;
     private boolean isArtifactChanged = false;
     private boolean isPackageNameChanged = false;
 
-    public ProjectDetails(SolonInitializrBuilder moduleBuilder, WizardContext context){
-        
+    public ProjectDetails(SolonInitializrBuilder moduleBuilder, WizardContext context) {
+
         this.moduleBuilder = moduleBuilder;
         this.wizardContext = context;
         this.metadata = this.moduleBuilder.getMetadata();
 
         // Init and select default jdk
-        if (ComboBox_JDK != null && ComboBox_JDK.getItemCount() > 0 && !ComboBox_JDK.isProjectJdkSelected()){
+        if (ComboBox_JDK != null && ComboBox_JDK.getItemCount() > 0 && !ComboBox_JDK.isProjectJdkSelected()) {
             ComboBox_JDK.setSelectedIndex(0);
             this.metadata.setSdk(ComboBox_JDK.getSelectedJdk());
         }
@@ -84,7 +84,10 @@ public class ProjectDetails {
         TextField_Name.addCaretListener(e -> {
             this.isNameChanged = true;
             this.metadata.setName(TextField_Name.getText());
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
         });
+
+        LocationTips.setText(this.metadata.getLocation() + "\\" + TextField_Name.getText());
 
         TextField_Group.setText(this.metadata.getGroupId());
         TextField_Group.addCaretListener(e -> {
@@ -127,9 +130,15 @@ public class ProjectDetails {
         TextField_Location.setText(this.metadata.getLocation());
         TextField_Location.addActionListener(e -> {
             this.metadata.setLocation(TextField_Location.getText());
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
         });
 
-        if (metadata.getInitMetadata() != null){
+        TextField_Location.getTextField().addCaretListener(e -> {
+            this.metadata.setLocation(TextField_Location.getText());
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
+        });
+
+        if (metadata.getInitMetadata() != null) {
             for (SolonMetadataOptionItem option : metadata.getInitMetadata().getSolonVer().getOptions()) {
                 ComboBox_SolonVer.addItem(option);
             }
@@ -160,11 +169,11 @@ public class ProjectDetails {
         });
     }
 
-    public JPanel getRoot(){
+    public JPanel getRoot() {
         return Panel_Root;
     }
 
-    public void createUIComponents(){
+    public void createUIComponents() {
         Project project = this.wizardContext.getProject() != null ? wizardContext.getProject() : ProjectManager.getInstance().getDefaultProject();
 
         ProjectSdksModel sdksModel = new ProjectSdksModel();
@@ -176,12 +185,13 @@ public class ProjectDetails {
         ButtonSelectorToolbar_Language = new ButtonSelectorToolbar(
                 "LanguageSelector",
                 new DefaultActionGroup(List.of(
-                    new ButtonSelectorAction<>(LanguageOption.JAVA, languageProperty, LanguageOption.JAVA.getLabel()),
-                    new ButtonSelectorAction<>(LanguageOption.KOTLIN, languageProperty, LanguageOption.KOTLIN.getLabel()),
-                    new ButtonSelectorAction<>(LanguageOption.GROOVY, languageProperty, LanguageOption.GROOVY.getLabel())
+                        new ButtonSelectorAction<>(LanguageOption.JAVA, languageProperty, LanguageOption.JAVA.getLabel()),
+                        new ButtonSelectorAction<>(LanguageOption.KOTLIN, languageProperty, LanguageOption.KOTLIN.getLabel()),
+                        new ButtonSelectorAction<>(LanguageOption.GROOVY, languageProperty, LanguageOption.GROOVY.getLabel())
                 )),
                 true
         );
+
         languageProperty.afterChange(option -> {
             this.metadata.setLanguage(option.getValue());
             return null;
@@ -201,7 +211,6 @@ public class ProjectDetails {
             this.metadata.setType(option.getValue());
             return null;
         });
-
         GraphProperty<PackagingOption> packagingProperty = new GraphPropertyImpl<>(new PropertyGraph(), () -> PackagingOption.JAR);
         ButtonSelectorToolbar_Packaging = new ButtonSelectorToolbar(
                 "PackagingSelector",
@@ -216,8 +225,9 @@ public class ProjectDetails {
             return null;
         });
 
-
-
+        ButtonSelectorToolbar_Language.setTargetComponent(Panel_Root);
+        ButtonSelectorToolbar_Type.setTargetComponent(Panel_Root);
+        ButtonSelectorToolbar_Packaging.setTargetComponent(Panel_Root);
     }
 
     public boolean validate(ModuleBuilder moduleBuilder, WizardContext wizardContext)
@@ -245,7 +255,4 @@ public class ProjectDetails {
         }
         return true;
     }
-
-
-
 }
