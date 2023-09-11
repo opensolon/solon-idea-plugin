@@ -2,7 +2,7 @@
 <idea-plugin>
     <id>org.noear.solon.idea.plugin</id>
     <name>Solon</name>
-    <vendor url="https://gitee.com/noear" email="noear@live.cn">noear.org</vendor>
+    <vendor url="https://solon.noear.org" email="noear@live.cn">noearorg</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
@@ -35,11 +35,11 @@
                 builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"
                 order="last"/>
 
+        <postStartupActivity implementation="org.noear.solon.idea.plugin.suggestion.event.SuggestionIndexEvent"/>
+
     </extensions>
 
     <applicationListeners>
-        <listener class="org.noear.solon.idea.plugin.suggestion.event.SuggestionIndexEvent"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
         <listener class="org.noear.solon.idea.plugin.suggestion.event.SuggestionReIndexEvent"
                   topic="com.intellij.openapi.compiler.CompilationStatusListener"/>
     </applicationListeners>

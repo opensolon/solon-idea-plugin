@@ -249,6 +249,28 @@
         <properties>
           <foreground color="-10458763"/>
           <text value="{basePath}/{name}"/>
+      <component id="cc8b5" class="javax.swing.JComboBox" binding="ComboBox_Language">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <model/>
+        </properties>
+      </component>
+      <component id="f1b12" class="javax.swing.JComboBox" binding="ComboBox_Type">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <model/>
+        </properties>
+      </component>
+      <component id="65dcd" class="javax.swing.JComboBox" binding="ComboBox_Packaging">
+        <constraints>
+          <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <model/>
         </properties>
       </component>
     </children>
