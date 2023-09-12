@@ -52,7 +52,6 @@ public class ProjectDetails {
     private JComboBox<SolonMetadataOptionItem> ComboBox_Type;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Packaging;
 
-    private boolean TipsLock = false;
     private boolean isNameChanged = false;
     private boolean isGroupChanged = false;
     private boolean isArtifactChanged = false;
