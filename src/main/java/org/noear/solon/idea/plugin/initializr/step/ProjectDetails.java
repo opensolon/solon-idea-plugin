@@ -2,9 +2,7 @@ package org.noear.solon.idea.plugin.initializr.step;
 
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
-import com.intellij.openapi.observable.properties.GraphPropertyImpl;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -77,7 +75,7 @@ public class ProjectDetails {
         TextField_Name.addCaretListener(e -> {
             this.isNameChanged = true;
             this.metadata.setName(TextField_Name.getText());
-            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Name.getText()));
         });
 
         LocationTips.setText(this.metadata.getLocation() + "\\" + TextField_Name.getText());
@@ -86,18 +84,24 @@ public class ProjectDetails {
         TextField_Group.addCaretListener(e -> {
             this.isGroupChanged = true;
             this.metadata.setGroupId(TextField_Group.getText());
+            TextField_PackageName.setText(TextField_Group.getText() + "." + TextField_Artifact.getText());
+            this.metadata.setPackageName(TextField_PackageName.getText());
         });
 
         TextField_Artifact.setText(this.metadata.getArtifactId());
         TextField_Artifact.addCaretListener(e -> {
             this.isArtifactChanged = true;
             this.metadata.setArtifactId(TextField_Artifact.getText());
+            TextField_PackageName.setText(TextField_Group.getText() + "." + TextField_Artifact.getText());
+            this.metadata.setPackageName(TextField_PackageName.getText());
+
         });
 
         TextField_PackageName.setText(this.metadata.getPackageName());
         TextField_PackageName.addCaretListener(e -> {
             this.isPackageNameChanged = true;
             this.metadata.setPackageName(TextField_PackageName.getText());
+
         });
 
         ComboBox_Archetype.setSelectedItem(this.metadata.getJavaVersion());
@@ -138,12 +142,12 @@ public class ProjectDetails {
         TextField_Location.setText(this.metadata.getLocation());
         TextField_Location.addActionListener(e -> {
             this.metadata.setLocation(TextField_Location.getText());
-            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Name.getText()));
         });
 
         TextField_Location.getTextField().addCaretListener(e -> {
             this.metadata.setLocation(TextField_Location.getText());
-            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Name.getText()));
         });
 
         if (metadata.getInitMetadata() != null) {
