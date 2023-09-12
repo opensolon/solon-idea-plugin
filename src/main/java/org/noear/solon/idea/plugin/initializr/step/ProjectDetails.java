@@ -2,7 +2,9 @@ package org.noear.solon.idea.plugin.initializr.step;
 
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.observable.properties.GraphPropertyImpl;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -19,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
 import org.noear.solon.idea.plugin.initializr.metadata.SolonCreationMetadata;
 import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadataOptionItem;
+import org.noear.solon.idea.plugin.initializr.util.StringUtils;
 
 import javax.swing.*;
 
@@ -44,6 +47,7 @@ public class ProjectDetails {
     private JComboBox<SolonMetadataOptionItem> ComboBox_SolonVer;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Archetype;
     private JComboBox<SolonMetadataOptionItem> ComboBox_JavaVersion;
+    private JLabel LocationTips;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Language;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Type;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Packaging;
@@ -53,15 +57,14 @@ public class ProjectDetails {
     private boolean isArtifactChanged = false;
     private boolean isPackageNameChanged = false;
 
-    public ProjectDetails(SolonInitializrBuilder moduleBuilder, WizardContext context){
-        
+    public ProjectDetails(SolonInitializrBuilder moduleBuilder, WizardContext context) {
+
         this.moduleBuilder = moduleBuilder;
         this.wizardContext = context;
         this.metadata = this.moduleBuilder.getMetadata();
 
         // Init and select default jdk
-        if (ComboBox_JDK != null && ComboBox_JDK.getItemCount() > 0 && !ComboBox_JDK.isProjectJdkSelected()){
-
+        if (ComboBox_JDK != null && ComboBox_JDK.getItemCount() > 0 && !ComboBox_JDK.isProjectJdkSelected()) {
             ComboBox_JDK.setSelectedIndex(0);
             this.metadata.setSdk(ComboBox_JDK.getSelectedJdk());
 
@@ -74,7 +77,10 @@ public class ProjectDetails {
         TextField_Name.addCaretListener(e -> {
             this.isNameChanged = true;
             this.metadata.setName(TextField_Name.getText());
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
         });
+
+        LocationTips.setText(this.metadata.getLocation() + "\\" + TextField_Name.getText());
 
         TextField_Group.setText(this.metadata.getGroupId());
         TextField_Group.addCaretListener(e -> {
@@ -132,9 +138,15 @@ public class ProjectDetails {
         TextField_Location.setText(this.metadata.getLocation());
         TextField_Location.addActionListener(e -> {
             this.metadata.setLocation(TextField_Location.getText());
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
         });
 
-        if (metadata.getInitMetadata() != null){
+        TextField_Location.getTextField().addCaretListener(e -> {
+            this.metadata.setLocation(TextField_Location.getText());
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(),TextField_Name.getText()));
+        });
+
+        if (metadata.getInitMetadata() != null) {
             for (SolonMetadataOptionItem option : metadata.getInitMetadata().getSolonVer().getOptions()) {
                 ComboBox_SolonVer.addItem(option);
             }
@@ -177,17 +189,18 @@ public class ProjectDetails {
         });
     }
 
-    public JPanel getRoot(){
+    public JPanel getRoot() {
         return Panel_Root;
     }
 
-    public void createUIComponents(){
+    public void createUIComponents() {
         Project project = this.wizardContext.getProject() != null ? wizardContext.getProject() : ProjectManager.getInstance().getDefaultProject();
 
         ProjectSdksModel sdksModel = new ProjectSdksModel();
         sdksModel.reset(project);
 
         ComboBox_JDK = new JdkComboBox(project, sdksModel, sdk -> sdk instanceof JavaSdkType, null, null, null);
+
 
     }
 
@@ -216,7 +229,4 @@ public class ProjectDetails {
         }
         return true;
     }
-
-
-
 }
