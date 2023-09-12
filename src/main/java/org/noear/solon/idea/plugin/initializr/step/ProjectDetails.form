@@ -241,17 +241,17 @@
           <model/>
         </properties>
       </component>
-      <component id="65dcd" class="javax.swing.JComboBox" binding="ComboBox_Packaging">
+      <component id="cc8b5" class="javax.swing.JComboBox" binding="ComboBox_Language">
         <constraints>
-          <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <model/>
         </properties>
       </component>
-      <component id="cc8b5" class="javax.swing.JComboBox" binding="ComboBox_Language">
+      <component id="65dcd" class="javax.swing.JComboBox" binding="ComboBox_Packaging">
         <constraints>
-          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <model/>
