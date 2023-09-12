@@ -4,6 +4,7 @@ import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.WizardContext;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.observable.properties.GraphPropertyImpl;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -18,7 +19,6 @@ import com.intellij.openapi.util.NlsSafe;
 import com.intellij.ui.components.JBTextField;
 import org.jetbrains.annotations.NotNull;
 import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
-import org.noear.solon.idea.plugin.initializr.metadata.TypeOption;
 import org.noear.solon.idea.plugin.initializr.metadata.SolonCreationMetadata;
 import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadataOptionItem;
 import org.noear.solon.idea.plugin.initializr.util.StringUtils;
@@ -202,53 +202,6 @@ public class ProjectDetails {
 
         ComboBox_JDK = new JdkComboBox(project, sdksModel, sdk -> sdk instanceof JavaSdkType, null, null, null);
 
-        GraphProperty<LanguageOption> languageProperty = new GraphPropertyImpl<>(new PropertyGraph(), () -> LanguageOption.JAVA);
-        ButtonSelectorToolbar_Language = new ButtonSelectorToolbar(
-                "LanguageSelector",
-                new DefaultActionGroup(List.of(
-                        new ButtonSelectorAction<>(LanguageOption.JAVA, languageProperty, LanguageOption.JAVA.getLabel()),
-                        new ButtonSelectorAction<>(LanguageOption.KOTLIN, languageProperty, LanguageOption.KOTLIN.getLabel()),
-                        new ButtonSelectorAction<>(LanguageOption.GROOVY, languageProperty, LanguageOption.GROOVY.getLabel())
-                )),
-                true
-        );
-
-        languageProperty.afterChange(option -> {
-            this.metadata.setLanguage(option.getValue());
-            return null;
-        });
-
-        GraphProperty<TypeOption> typeProperty = new GraphPropertyImpl<>(new PropertyGraph(), () -> TypeOption.MAVEN);
-        ButtonSelectorToolbar_Type = new ButtonSelectorToolbar(
-                "TypeSelector",
-                new DefaultActionGroup(List.of(
-                        new ButtonSelectorAction<>(TypeOption.MAVEN, typeProperty, TypeOption.MAVEN.getLabel()),
-                        new ButtonSelectorAction<>(TypeOption.GRADLE_GROOVY, typeProperty, TypeOption.GRADLE_GROOVY.getLabel()),
-                        new ButtonSelectorAction<>(TypeOption.GRADLE_KOTLIN, typeProperty, TypeOption.GRADLE_KOTLIN.getLabel())
-                )),
-                true
-        );
-        typeProperty.afterChange(option -> {
-            this.metadata.setType(option.getValue());
-            return null;
-        });
-        GraphProperty<PackagingOption> packagingProperty = new GraphPropertyImpl<>(new PropertyGraph(), () -> PackagingOption.JAR);
-        ButtonSelectorToolbar_Packaging = new ButtonSelectorToolbar(
-                "PackagingSelector",
-                new DefaultActionGroup(List.of(
-                        new ButtonSelectorAction<>(PackagingOption.JAR, packagingProperty, PackagingOption.JAR.getLabel()),
-                        new ButtonSelectorAction<>(PackagingOption.WAR, packagingProperty, PackagingOption.WAR.getLabel())
-                )),
-                true
-        );
-        packagingProperty.afterChange(option -> {
-            this.metadata.setPackaging(option.getValue());
-            return null;
-        });
-
-        ButtonSelectorToolbar_Language.setTargetComponent(Panel_Root);
-        ButtonSelectorToolbar_Type.setTargetComponent(Panel_Root);
-        ButtonSelectorToolbar_Packaging.setTargetComponent(Panel_Root);
 
     }
 

@@ -172,24 +172,24 @@
           <text value="Packaging:"/>
         </properties>
       </component>
-      <component id="5533d" class="com.intellij.ui.layout.ButtonSelectorToolbar" binding="ButtonSelectorToolbar_Language" custom-create="true">
+      <!-- <component id="5533d" class="com.intellij.ui.layout.ButtonSelectorToolbar" binding="ButtonSelectorToolbar_Language" custom-create="true">
         <constraints>
           <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-      </component>
-      <component id="cf00b" class="com.intellij.ui.layout.ButtonSelectorToolbar" binding="ButtonSelectorToolbar_Type" custom-create="true">
+      </component> -->
+      <!-- <component id="cf00b" class="com.intellij.ui.layout.ButtonSelectorToolbar" binding="ButtonSelectorToolbar_Type" custom-create="true">
         <constraints>
           <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-      </component>
-      <component id="97a9c" class="com.intellij.ui.layout.ButtonSelectorToolbar" binding="ButtonSelectorToolbar_Packaging" custom-create="true">
+      </component> -->
+      <!-- <component id="97a9c" class="com.intellij.ui.layout.ButtonSelectorToolbar" binding="ButtonSelectorToolbar_Packaging" custom-create="true">
         <constraints>
           <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-      </component>
+      </component> -->
       <vspacer id="fb4e">
         <constraints>
           <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
@@ -249,6 +249,8 @@
         <properties>
           <foreground color="-10458763"/>
           <text value="{basePath}/{name}"/>
+        </properties>
+      </component>
       <component id="cc8b5" class="javax.swing.JComboBox" binding="ComboBox_Language">
         <constraints>
           <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
