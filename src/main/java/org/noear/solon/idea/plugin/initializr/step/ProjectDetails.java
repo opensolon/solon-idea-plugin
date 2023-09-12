@@ -86,12 +86,14 @@ public class ProjectDetails {
         TextField_Group.addCaretListener(e -> {
             this.isGroupChanged = true;
             this.metadata.setGroupId(TextField_Group.getText());
+            TextField_PackageName.setText(TextField_Group.getText()+"."+TextField_Artifact.getText());
         });
 
         TextField_Artifact.setText(this.metadata.getArtifactId());
         TextField_Artifact.addCaretListener(e -> {
             this.isArtifactChanged = true;
             this.metadata.setArtifactId(TextField_Artifact.getText());
+            TextField_PackageName.setText(TextField_Group.getText()+"."+TextField_Artifact.getText());
         });
 
         TextField_PackageName.setText(this.metadata.getPackageName());
