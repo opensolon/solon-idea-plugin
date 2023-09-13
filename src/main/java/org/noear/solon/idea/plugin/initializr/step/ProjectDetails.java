@@ -76,6 +76,7 @@ public class ProjectDetails {
             this.isNameChanged = true;
             this.metadata.setName(TextField_Name.getText());
             LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Name.getText()));
+            TextField_Artifact.setText(TextField_Name.getText());
         });
 
         LocationTips.setText(this.metadata.getLocation() + "\\" + TextField_Name.getText());
@@ -85,16 +86,17 @@ public class ProjectDetails {
             this.isGroupChanged = true;
             this.metadata.setGroupId(TextField_Group.getText());
             TextField_PackageName.setText(TextField_Group.getText() + "." + TextField_Artifact.getText());
-            this.metadata.setPackageName(TextField_PackageName.getText());
         });
 
         TextField_Artifact.setText(this.metadata.getArtifactId());
         TextField_Artifact.addCaretListener(e -> {
             this.isArtifactChanged = true;
             this.metadata.setArtifactId(TextField_Artifact.getText());
-            TextField_PackageName.setText(TextField_Group.getText() + "." + TextField_Artifact.getText());
-            this.metadata.setPackageName(TextField_PackageName.getText());
-
+            String artifact = TextField_Artifact.getText();
+            if (artifact.contains("-")) {
+                artifact=artifact.replace("-","_");
+            }
+            TextField_PackageName.setText(TextField_Group.getText() + "." + artifact);
         });
 
         TextField_PackageName.setText(this.metadata.getPackageName());
@@ -233,4 +235,5 @@ public class ProjectDetails {
         }
         return true;
     }
+
 }
