@@ -1,6 +1,10 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # Solon Changelog
+## [0.0.1-M7]
+### Added
+- Initializer ux logic optimization
+- Removing Pulling Metadata Popup
 
 ## [0.0.1-M6]
 ### Added
