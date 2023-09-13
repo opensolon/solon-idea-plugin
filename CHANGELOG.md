@@ -5,6 +5,7 @@
 ### Added
 - Initializer ux logic optimization
 - Removing Pulling Metadata Popup
+- [fix] app.properties code hint bug
 
 ## [0.0.1-M6]
 ### Added
