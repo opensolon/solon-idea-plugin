@@ -43,6 +43,7 @@ public class PropertiesCompletionProvider extends CompletionProvider<CompletionP
         }else if(property != null && element.getClass() == PropertyValueImpl.class){
             elementBuilders = suggestionService.findHintSuggestionsForQueryPrefix(property.getKey(), queryWithDotDelimitedPrefixes);
         }
+        assert elementBuilders != null;
         elementBuilders.forEach(resultSet::addElement);
     }
 

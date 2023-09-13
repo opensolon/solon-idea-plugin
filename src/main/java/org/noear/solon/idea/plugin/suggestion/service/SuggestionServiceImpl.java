@@ -1,9 +1,14 @@
 package org.noear.solon.idea.plugin.suggestion.service;
 
 import com.alibaba.fastjson2.JSON;
+import com.intellij.codeInsight.completion.InsertHandler;
+import com.intellij.codeInsight.completion.InsertionContext;
+import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
@@ -28,7 +33,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.Future;
 
-public class SuggestionServiceImpl implements SuggestionService{
+public class SuggestionServiceImpl implements SuggestionService {
 
     private final Trie<String, SolonConfigurationMetadataProperty> propertiesSearchIndex;
     private final Trie<String, SolonConfigurationMetadataHint> hintsSearchIndex;
@@ -41,7 +46,7 @@ public class SuggestionServiceImpl implements SuggestionService{
         this.hintsSearchIndex = new PatriciaTrie<>();
     }
 
-    private void clearSearchIndex(){
+    private void clearSearchIndex() {
         this.propertiesSearchIndex.clear();
         this.hintsSearchIndex.clear();
     }
@@ -101,7 +106,6 @@ public class SuggestionServiceImpl implements SuggestionService{
     }
 
 
-
     private void loadModuleSearchIndex(Module module) {
         /**
          * Order entries include SDK, libraries and other modules the module uses.
@@ -118,10 +122,10 @@ public class SuggestionServiceImpl implements SuggestionService{
     private void processContainers(Module module, List<MetadataContainer> containersToProcess) {
         for (MetadataContainer metadataContainer : containersToProcess) {
             String metadataFilePath = metadataContainer.getFileUrl();
-            try (InputStream inputStream = metadataContainer.getMetadataFile().getInputStream()){
+            try (InputStream inputStream = metadataContainer.getMetadataFile().getInputStream()) {
                 SolonConfigurationMetadata solonConfigurationMetadata = JSON.parseObject(new BufferedReader(new InputStreamReader(inputStream)), SolonConfigurationMetadata.class);
                 buildMetadataHierarchy(module, solonConfigurationMetadata);
-            }catch (IOException e){
+            } catch (IOException e) {
                 LoggerUtil.getLogger(this.getClass()).error("Exception encountered while processing metadata file: " + metadataFilePath, e);
             }
         }
@@ -161,7 +165,19 @@ public class SuggestionServiceImpl implements SuggestionService{
         SortedMap<String, SolonConfigurationMetadataProperty> sortedMap = this.propertiesSearchIndex.prefixMap(queryWithDotDelimitedPrefixes);
         List<LookupElementBuilder> builders = new ArrayList<>();
         for (Map.Entry<String, SolonConfigurationMetadataProperty> entry : sortedMap.entrySet()) {
-            builders.add(toLookupElementBuilder(entry.getValue()));
+            builders.add(toLookupElementBuilder(entry.getValue()).withInsertHandler((context, item) -> {
+                int index = queryWithDotDelimitedPrefixes.lastIndexOf(".");
+                Editor editor = context.getEditor();
+                int startOffset = context.getStartOffset();
+                int endOffset = context.getTailOffset();
+                Document document = editor.getDocument();
+                String text = item.getLookupString();
+                if (index > 0) {
+                    text = text.substring(index + 1);
+                }
+                document.replaceString(startOffset, endOffset, text);
+                editor.getCaretModel().moveToOffset(endOffset);
+            }));
         }
         return builders;
     }
@@ -169,12 +185,14 @@ public class SuggestionServiceImpl implements SuggestionService{
     @Override
     public @Nullable List<LookupElementBuilder> findHintSuggestionsForQueryPrefix(String property, String queryWithDotDelimitedPrefixes) {
         SolonConfigurationMetadataHint hint = this.hintsSearchIndex.get(property);
-        if (hint == null){
+        if (hint == null) {
             return new ArrayList<>();
         }
         List<LookupElementBuilder> builders = new ArrayList<>();
         for (SolonConfigurationMetadataHintValue hintValue : hint.getValues()) {
-            if (hintValue.getValue() == null) {continue;}
+            if (hintValue.getValue() == null) {
+                continue;
+            }
             builders.add(toLookupElementBuilder(hintValue));
         }
         return builders;
@@ -182,11 +200,11 @@ public class SuggestionServiceImpl implements SuggestionService{
 
     private LookupElementBuilder toLookupElementBuilder(SolonConfigurationMetadataHintValue hintValue) {
         LookupElementBuilder builder = LookupElementBuilder.create(hintValue.getValue());
-        if (hintValue.getDescription() != null){
+        if (hintValue.getDescription() != null) {
             builder.withTypeText(hintValue.getDescription(), true);
         }
         SolonConfigurationMetadataProperty property = this.propertiesSearchIndex.get(hintValue.getValue());
-        if (property != null && property.getDefaultValue() != null){
+        if (property != null && property.getDefaultValue() != null) {
             if (hintValue.getValue().toString().equals(property.getDefaultValue().toString())) {
                 builder.bold();
             }
@@ -196,8 +214,8 @@ public class SuggestionServiceImpl implements SuggestionService{
 
     private LookupElementBuilder toLookupElementBuilder(SolonConfigurationMetadataProperty property) {
         LookupElementBuilder builder = LookupElementBuilder.create(property.getName());
-        if (property.getDescription() != null){
-            builder.withTypeText(property.getDescription(),true);
+        if (property.getDescription() != null) {
+            builder.withTypeText(property.getDescription(), true);
         }
         return builder;
     }
