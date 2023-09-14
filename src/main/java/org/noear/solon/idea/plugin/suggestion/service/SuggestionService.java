@@ -2,15 +2,12 @@ package org.noear.solon.idea.plugin.suggestion.service;
 
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 public interface SuggestionService {
 
@@ -32,5 +29,7 @@ public interface SuggestionService {
     @Nullable
     List<LookupElementBuilder> findHintSuggestionsForQueryPrefix(String key, String queryWithDotDelimitedPrefixes);
 
+    @Nullable
+    List<LookupElementBuilder> findYamlSuggestionsForQueryPrefix(String queryWithDotDelimitedPrefixes);
     boolean canProvideSuggestions();
 }

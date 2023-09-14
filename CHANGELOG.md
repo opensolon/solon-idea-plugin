@@ -1,6 +1,10 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # Solon Changelog
+## [0.0.1-M9]
+### Added
+- [Feature] support yml key hint
+
 ## [0.0.1-M8]
 ### Added
 - [Feature] Suppresses unused warnings for beans annotated with solons

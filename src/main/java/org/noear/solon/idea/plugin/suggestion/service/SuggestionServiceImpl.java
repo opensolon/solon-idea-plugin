@@ -36,6 +36,8 @@ public class SuggestionServiceImpl implements SuggestionService {
     private Future<?> currentExecution;
     private volatile boolean indexingInProgress;
 
+    private final String DELIMITER = "\\.";
+
     public SuggestionServiceImpl() {
         this.propertiesSearchIndex = new PatriciaTrie<>();
         this.hintsSearchIndex = new PatriciaTrie<>();
@@ -161,7 +163,7 @@ public class SuggestionServiceImpl implements SuggestionService {
         List<LookupElementBuilder> builders = new ArrayList<>();
         for (Map.Entry<String, SolonConfigurationMetadataProperty> entry : sortedMap.entrySet()) {
             builders.add(toLookupElementBuilder(entry.getValue()).withInsertHandler((context, item) -> {
-                int index = queryWithDotDelimitedPrefixes.lastIndexOf(".");
+                int index = queryWithDotDelimitedPrefixes.lastIndexOf(DELIMITER);
                 Editor editor = context.getEditor();
                 int startOffset = context.getStartOffset();
                 int endOffset = context.getTailOffset();
@@ -189,6 +191,37 @@ public class SuggestionServiceImpl implements SuggestionService {
                 continue;
             }
             builders.add(toLookupElementBuilder(hintValue));
+        }
+        return builders;
+    }
+
+    @Override
+    public @Nullable List<LookupElementBuilder> findYamlSuggestionsForQueryPrefix(String queryWithDotDelimitedPrefixes) {
+        SortedMap<String, SolonConfigurationMetadataProperty> sortedMap = this.propertiesSearchIndex.prefixMap(queryWithDotDelimitedPrefixes);
+        List<LookupElementBuilder> builders = new ArrayList<>();
+        for (Map.Entry<String, SolonConfigurationMetadataProperty> entry : sortedMap.entrySet()) {
+            builders.add(toLookupElementBuilder(entry.getValue()).withInsertHandler((context, item) -> {
+                int index = queryWithDotDelimitedPrefixes.lastIndexOf(DELIMITER);
+                Editor editor = context.getEditor();
+                int startOffset = context.getStartOffset();
+                int endOffset = context.getTailOffset();
+                Document document = editor.getDocument();
+                String text = item.getLookupString();
+                String[] count = text.split(DELIMITER);
+                StringBuffer resultText = new StringBuffer();
+                for (int i = 0; i < count.length; i++) {
+                    resultText.append(count[i]);
+                    resultText.append(":\n");
+                    if(i == count.length-1){
+                        break;
+                    }
+                    resultText.append("  ".repeat(i + 1));
+                }
+
+                text = resultText.toString();
+                document.replaceString(startOffset, endOffset, text);
+                editor.getCaretModel().moveToOffset(text.length()-1);
+            }));
         }
         return builders;
     }
