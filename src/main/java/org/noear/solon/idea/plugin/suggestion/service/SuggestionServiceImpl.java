@@ -1,11 +1,7 @@
 package org.noear.solon.idea.plugin.suggestion.service;
 
 import com.alibaba.fastjson2.JSON;
-import com.intellij.codeInsight.completion.InsertHandler;
-import com.intellij.codeInsight.completion.InsertionContext;
-import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -18,7 +14,6 @@ import org.apache.commons.collections4.Trie;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.apache.commons.lang.time.StopWatch;
 import org.jetbrains.annotations.Nullable;
-import org.noear.solon.idea.plugin.SolonIcons;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
 import org.noear.solon.idea.plugin.suggestion.metadata.MetadataContainer;
 import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadata;

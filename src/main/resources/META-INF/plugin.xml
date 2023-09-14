@@ -37,6 +37,7 @@
 
         <postStartupActivity implementation="org.noear.solon.idea.plugin.suggestion.event.SuggestionIndexEvent"/>
 
+        <implicitUsageProvider implementation="org.noear.solon.idea.plugin.suggestion.service.UsageProviderServiceImpl"/>
     </extensions>
 
     <applicationListeners>
