@@ -7,6 +7,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.properties</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
     <depends config-file="maven.xml" optional="true">org.jetbrains.idea.maven</depends>
     <depends config-file="gradle.xml" optional="true">com.intellij.gradle</depends>
 
@@ -27,9 +28,20 @@
                   fileNames="app.properties"
                   patterns="app-*.properties"/>
 
+        <fileType name="solon-yaml-file"
+                  implementationClass="org.noear.solon.idea.plugin.suggestion.filetype.SolonYamlFileType"
+                  fieldName="INSTANCE"
+                  fileNames="app.yaml;app.yml"
+                  extensions="yaml,yml"
+                  patterns="app-*.yaml;app-*.yml"/>
+
         <completion.contributor
                 language="Properties"
                 implementationClass="org.noear.solon.idea.plugin.suggestion.completion.PropertiesCompletionContributor"/>
+
+        <completion.contributor
+                language="yaml"
+                implementationClass="org.noear.solon.idea.plugin.suggestion.completion.YamlCompletionContributor"/>
 
         <moduleBuilder
                 builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"
