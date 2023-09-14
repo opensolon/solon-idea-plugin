@@ -1,6 +1,11 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # Solon Changelog
+## [0.0.1-M8]
+### Added
+- [Feature] Suppresses unused warnings for beans annotated with solons
+- [Feature] Suppresses unassigned warnings for private fields with solon annotations
+
 ## [0.0.1-M7]
 ### Added
 - Initializer ux logic optimization
