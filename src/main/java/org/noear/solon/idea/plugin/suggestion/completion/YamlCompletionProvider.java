@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.ProcessingContext;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
 import org.jetbrains.yaml.psi.impl.YAMLKeyValueImpl;
@@ -44,7 +45,8 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
         if (yaml != null && yaml.getParent().getClass() == YAMLKeyValueImpl.class) {
             elementBuilders = suggestionService.findHintSuggestionsForQueryPrefix(yamlKey, queryWithDotDelimitedPrefixes);
         } else if (yaml != null) {
-            elementBuilders = suggestionService.findYamlSuggestionsForQueryPrefix(yamlKey+"."+queryWithDotDelimitedPrefixes);
+
+            elementBuilders = suggestionService.findYamlSuggestionsForQueryPrefix((StringUtils.isEmpty(yamlKey)?yamlKey:yamlKey+".")+queryWithDotDelimitedPrefixes);
 
         }
         assert elementBuilders != null;
