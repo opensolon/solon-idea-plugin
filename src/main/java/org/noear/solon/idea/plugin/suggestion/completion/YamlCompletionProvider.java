@@ -9,6 +9,8 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.yaml.psi.YAMLKeyValue;
+import org.jetbrains.yaml.psi.impl.YAMLKeyValueImpl;
 import org.jetbrains.yaml.psi.impl.YAMLPlainTextImpl;
 import org.noear.solon.idea.plugin.common.util.GenericUtil;
 import org.noear.solon.idea.plugin.suggestion.service.SuggestionService;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
+
+    private int hint_offset=0;
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet resultSet) {
@@ -36,14 +40,40 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
 
         String queryWithDotDelimitedPrefixes = GenericUtil.truncateIdeaDummyIdentifier(element);
         List<LookupElementBuilder> elementBuilders = new ArrayList<>();
-        if (yaml != null && queryWithDotDelimitedPrefixes.contains(": ")) {
-            elementBuilders = suggestionService.findHintSuggestionsForQueryPrefix(queryWithDotDelimitedPrefixes, queryWithDotDelimitedPrefixes);
+        String yamlKey = getYamlKey(yaml);
+        if (yaml != null && yaml.getParent().getClass() == YAMLKeyValueImpl.class) {
+            elementBuilders = suggestionService.findHintSuggestionsForQueryPrefix(yamlKey, queryWithDotDelimitedPrefixes);
         } else if (yaml != null) {
-            elementBuilders = suggestionService.findYamlSuggestionsForQueryPrefix(queryWithDotDelimitedPrefixes);
+            elementBuilders = suggestionService.findYamlSuggestionsForQueryPrefix(yamlKey+"."+queryWithDotDelimitedPrefixes);
 
         }
         assert elementBuilders != null;
         elementBuilders.forEach(resultSet::addElement);
+    }
+
+    private String getYamlKey(YAMLPlainTextImpl yamlPlainText){
+        List<String> keys = new ArrayList<>();
+        PsiElement parent = yamlPlainText.getParent();
+        StringBuffer yamlKey=new StringBuffer();
+        while (parent != null) {
+            if (parent instanceof YAMLKeyValue) {
+                YAMLKeyValue keyValue = (YAMLKeyValue) parent;
+                String key = keyValue.getKeyText();
+                keys.add(key);
+            }
+            try {
+                parent = parent.getParent();
+            }catch (Exception ex){
+                parent=null;
+            }
+        }
+        for (int i = keys.size()-1 ; i >= 0; i--) {
+            yamlKey.append(keys.get(i));
+            if(i!=0){
+                yamlKey.append(":");
+            }
+        }
+        return  yamlKey.toString().replace(":",".");
     }
 
     private <T> T getParentOfType(PsiElement element, Class<T> clazz) {
