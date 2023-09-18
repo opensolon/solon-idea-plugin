@@ -212,8 +212,10 @@ public class SuggestionServiceImpl implements SuggestionService {
                 Document document = editor.getDocument();
                 String text = item.getLookupString();
                 boolean lastDot=queryWithDotDelimitedPrefixes.length() == queryWithDotDelimitedPrefixes.lastIndexOf(".") + 1;
+                boolean queryNotEmpty = queryWithDotDelimitedPrefixes.length() > 1;
+                int queryLength = queryNotEmpty ? (queryWithDotDelimitedPrefixes.length() - 1) : queryWithDotDelimitedPrefixes.length();
                 String query = lastDot?
-                        queryWithDotDelimitedPrefixes.substring(0, queryWithDotDelimitedPrefixes.length() - 1) : queryWithDotDelimitedPrefixes;
+                        queryWithDotDelimitedPrefixes.substring(0, queryLength) : queryWithDotDelimitedPrefixes;
                 String supplementText = text.substring(lastDot?query.length():query.length()-1);
                 supplementText=supplementText.indexOf(".")==0?supplementText.substring(1):supplementText;
                 String[] count = supplementText.split(DELIMITER);
