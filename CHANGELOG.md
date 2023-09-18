@@ -1,6 +1,11 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # Solon Changelog
+## [0.0.3-M1]
+### Added
+- [Feature] support yml key hint
+- [Feature] Optimization of yaml support
+
 ## [0.0.2-M1]
 ### Added
 - [Feature] support yml key hint
