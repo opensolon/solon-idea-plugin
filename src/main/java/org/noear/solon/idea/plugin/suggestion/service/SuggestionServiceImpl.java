@@ -12,6 +12,7 @@ import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.collections4.Trie;
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.jetbrains.annotations.Nullable;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
@@ -210,22 +211,25 @@ public class SuggestionServiceImpl implements SuggestionService {
                 int endOffset = context.getTailOffset();
                 Document document = editor.getDocument();
                 String text = item.getLookupString();
-                String supplementText = text.substring(queryWithDotDelimitedPrefixes.length()-1);
+                boolean lastDot=queryWithDotDelimitedPrefixes.length() == queryWithDotDelimitedPrefixes.lastIndexOf(".") + 1;
+                String query = lastDot?
+                        queryWithDotDelimitedPrefixes.substring(0, queryWithDotDelimitedPrefixes.length() - 1) : queryWithDotDelimitedPrefixes;
+                String supplementText = text.substring(lastDot?query.length():query.length()-1);
+                supplementText=supplementText.indexOf(".")==0?supplementText.substring(1):supplementText;
                 String[] count = supplementText.split(DELIMITER);
                 StringBuffer resultText = new StringBuffer();
                 for (int i = 0; i < count.length; i++) {
                     resultText.append(count[i]);
                     resultText.append(YML_DELIMITER);
-                    if(i == count.length-1){
+                    if (i == count.length - 1) {
                         break;
                     }
                     resultText.append(LINE);
                     resultText.append(YML_FORMAT.repeat(i + 1));
                 }
                 text = resultText.toString();
-                System.out.println(editor.getCaretModel().getOffset());
-                document.replaceString(startOffset, endOffset, text);
-                editor.getCaretModel().moveToOffset(startOffset+text.length());
+                document.replaceString(lastDot?startOffset-1:startOffset, endOffset, text);
+                editor.getCaretModel().moveToOffset(startOffset + (lastDot?text.length()-1:text.length()));
             }));
         }
         return builders;

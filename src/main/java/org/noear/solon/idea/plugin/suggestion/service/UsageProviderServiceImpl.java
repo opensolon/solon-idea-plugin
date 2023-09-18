@@ -17,6 +17,7 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
     private final String[] CLASS_ANNOTATION = new String[]{"org.noear.solon.annotation.Controller","org.noear.solon.annotation.Configuration","org.noear.solon.annotation.Component"};
     private final String[] METHOD_ANNOTATION = new String[]{"org.noear.solon.annotation.Mapping","org.noear.solon.annotation.Bean"};
 
+
     /**
      * Class is never used
      * @param element target element

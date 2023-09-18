@@ -21,7 +21,7 @@ import java.util.List;
 
 public class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
 
-    private int hint_offset=0;
+    private final String SUB_OPTION=".";
 
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet resultSet) {
@@ -45,8 +45,9 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
         if (yaml != null && yaml.getParent().getClass() == YAMLKeyValueImpl.class) {
             elementBuilders = suggestionService.findHintSuggestionsForQueryPrefix(yamlKey, queryWithDotDelimitedPrefixes);
         } else if (yaml != null) {
-
-            elementBuilders = suggestionService.findYamlSuggestionsForQueryPrefix((StringUtils.isEmpty(yamlKey)?yamlKey:yamlKey+".")+queryWithDotDelimitedPrefixes);
+            yamlKey = (StringUtils.isEmpty(yamlKey)?yamlKey:yamlKey+SUB_OPTION);
+            queryWithDotDelimitedPrefixes=queryWithDotDelimitedPrefixes.equals(SUB_OPTION)?yamlKey:yamlKey+queryWithDotDelimitedPrefixes;
+            elementBuilders = suggestionService.findYamlSuggestionsForQueryPrefix(queryWithDotDelimitedPrefixes);
 
         }
         assert elementBuilders != null;
