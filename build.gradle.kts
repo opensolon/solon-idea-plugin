@@ -45,7 +45,7 @@ intellij {
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
     groups.set(emptyList())
-    repositoryUrl.set(properties("pluginRepositoryUrl"))
+//    repositoryUrl.set(properties("pluginRepositoryUrl"))
 }
 
 
