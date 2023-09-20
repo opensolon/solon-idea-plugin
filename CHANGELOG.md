@@ -3,11 +3,11 @@
 # Solon Changelog
 ## [0.0.3]
 ### Added
-- IDEA Compatible with 2023.2.1 version
-- Yaml code supplement
-- Initializer ux logic optimization
-- The class with @Controller and its corresponding method will cancel unused
-- Unassigned warning for private field cancellation with @Inject
+- IDEA Compatible with 2023.2.1 version.
+- Yaml code supplement.
+- Initializer ux logic optimization.
+- The class with @Controller and its corresponding method will cancel unused.
+- Unassigned warning for private field cancellation with @Inject.
 
 ## [0.0.3-M1]
 ### Added
