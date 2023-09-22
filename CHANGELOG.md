@@ -1,6 +1,9 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
-
 # Solon Changelog
+## [0.0.4-M4]
+### Added
+- [fix] After creating the project, the value of java. version in pom.xml is incorrect
+
 ## [0.0.4-M3]
 ### Added
 - Attempting to handle Assertion failed
