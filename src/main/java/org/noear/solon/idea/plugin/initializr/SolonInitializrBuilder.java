@@ -89,17 +89,7 @@ public class SolonInitializrBuilder extends ModuleBuilder {
     // first wizard page
     @Override
     public @Nullable ModuleWizardStep getCustomOptionsStep(WizardContext wizardContext, Disposable parentDisposable) {
-        ProgressManager.getInstance().executeNonCancelableSection(() -> {
-            try {
-                this.getMetadata().refreshMetadataOptions(ProgressManager.getInstance().getProgressIndicator());
-            } catch (IOException e) {
-                ApplicationManager.getApplication().invokeLater(
-                        () -> Messages.showErrorDialog("Error: " + e.getMessage(), "Pull metadata Failed")
-                );
-            }
-        });
-        //暂时保留防止executeNonCancelableSection方法不正确用于参考
-//        ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
+//        ProgressManager.getInstance().executeNonCancelableSection(() -> {
 //            try {
 //                this.getMetadata().refreshMetadataOptions(ProgressManager.getInstance().getProgressIndicator());
 //            } catch (IOException e) {
@@ -107,7 +97,17 @@ public class SolonInitializrBuilder extends ModuleBuilder {
 //                        () -> Messages.showErrorDialog("Error: " + e.getMessage(), "Pull metadata Failed")
 //                );
 //            }
-//        }, "Pulling metadata...", true, null);
+//        });
+        //暂时保留防止executeNonCancelableSection方法不正确用于参考
+        ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
+            try {
+                this.getMetadata().refreshMetadataOptions(ProgressManager.getInstance().getProgressIndicator());
+            } catch (IOException e) {
+                ApplicationManager.getApplication().invokeLater(
+                        () -> Messages.showErrorDialog("Error: " + e.getMessage(), "Pull metadata Failed")
+                );
+            }
+        }, "Pulling metadata...", true, null);
         return new ProjectDetailsStep(this, wizardContext);
     }
 

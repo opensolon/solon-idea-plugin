@@ -18,11 +18,13 @@ import org.noear.solon.idea.plugin.suggestion.service.SuggestionService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
 
     private final String SUB_OPTION=".";
 
+    private SuggestionService suggestionService;
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet resultSet) {
         PsiElement element = parameters.getPosition();
@@ -30,8 +32,7 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
             return;
         }
 
-        Project project = element.getProject();
-        SuggestionService suggestionService = SuggestionService.getInstance(project);
+        SuggestionService suggestionService = getService(element);
 
         if (!suggestionService.canProvideSuggestions()) {
             return;
@@ -41,18 +42,27 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
 
         String queryWithDotDelimitedPrefixes = GenericUtil.truncateIdeaDummyIdentifier(element);
         List<LookupElementBuilder> elementBuilders = new ArrayList<>();
+        assert yaml != null;
         String yamlKey = getYamlKey(yaml);
-        if (yaml != null && yaml.getParent().getClass() == YAMLKeyValueImpl.class) {
+        if (yaml.getParent().getClass() == YAMLKeyValueImpl.class) {
             elementBuilders = suggestionService.findHintSuggestionsForQueryPrefix(yamlKey, queryWithDotDelimitedPrefixes);
-        } else if (yaml != null) {
+        } else{
             yamlKey = (StringUtils.isEmpty(yamlKey)?yamlKey:yamlKey+SUB_OPTION);
             queryWithDotDelimitedPrefixes=queryWithDotDelimitedPrefixes.equals(SUB_OPTION)?yamlKey:yamlKey+queryWithDotDelimitedPrefixes;
             elementBuilders = suggestionService.findYamlSuggestionsForQueryPrefix(queryWithDotDelimitedPrefixes);
-
         }
         assert elementBuilders != null;
         elementBuilders.forEach(resultSet::addElement);
     }
+
+    private SuggestionService getService(PsiElement element){
+        return Optional.ofNullable(suggestionService).orElseGet(() -> {
+            Project project = element.getProject();
+            SuggestionService suggestionService = SuggestionService.getInstance(project);
+            return suggestionService;
+        });
+    }
+
 
     private String getYamlKey(YAMLPlainTextImpl yamlPlainText){
         List<String> keys = new ArrayList<>();

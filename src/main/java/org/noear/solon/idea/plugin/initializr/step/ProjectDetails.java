@@ -79,7 +79,8 @@ public class ProjectDetails {
             TextField_Artifact.setText(TextField_Name.getText());
         });
 
-        LocationTips.setText(this.metadata.getLocation() + "\\" + TextField_Name.getText());
+
+        LocationTips.setText(StringUtils.PathStrAssemble(this.metadata.getLocation(),TextField_Name.getText()));
 
         TextField_Group.setText(this.metadata.getGroupId());
         TextField_Group.addCaretListener(e -> {
