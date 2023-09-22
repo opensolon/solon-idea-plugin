@@ -114,7 +114,7 @@ public class ProjectDetails {
 
         ComboBox_SolonVer.setSelectedItem(this.metadata.getJavaVersion());
         ComboBox_SolonVer.addActionListener(e -> {
-            this.metadata.setJavaVersion(ComboBox_SolonVer.getItemAt(ComboBox_SolonVer.getSelectedIndex()).getValue());
+            this.metadata.setSolonVer(ComboBox_SolonVer.getItemAt(ComboBox_SolonVer.getSelectedIndex()).getValue());
         });
 
         ComboBox_JavaVersion.setSelectedItem(this.metadata.getJavaVersion());
