@@ -1,6 +1,18 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # Solon Changelog
+## [0.0.4-M3]
+### Added
+- Attempting to handle Assertion failed
+
+## [0.0.4-M2]
+### Added
+- Attempting to handle Assertion failed
+
+## [0.0.4-M1]
+### Added
+- Abnormal display of interface in the Mac system
+
 ## [0.0.3]
 ### Added
 - IDEA Compatible with 2023.2.1 version.
