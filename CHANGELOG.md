@@ -1,5 +1,12 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+## [0.0.4]
+### Added
+- adjust ui
+- After creating the project, the value of java. version in pom.xml is incorrect
+- handle Assertion failed
+- Abnormal display of interface in the Mac system
+
 ## [0.0.4-M5]
 ### Added
 - [Feature] adjust ui
