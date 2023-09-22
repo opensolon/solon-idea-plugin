@@ -4,6 +4,7 @@ import java.util.List;
 
 public class SolonMetadata {
 
+    private SolonMetaServer server;
     private SolonMetadataOption project;
     private SolonMetadataOption language;
     private SolonMetadataOption solonVer;
@@ -14,6 +15,15 @@ public class SolonMetadata {
     private SolonMetadataOption packaging;
     private SolonMetadataOption javaVer;
     private SolonMetadataOption dependencies;
+
+    public SolonMetaServer getServer() {
+        return server;
+    }
+
+    public SolonMetadata setServer(SolonMetaServer server) {
+        this.server = server;
+        return this;
+    }
 
     public SolonMetadataOption getProject() {
         return project;
