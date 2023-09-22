@@ -14,14 +14,29 @@ import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.NlsSafe;
+import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import org.jetbrains.annotations.NotNull;
 import org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder;
 import org.noear.solon.idea.plugin.initializr.metadata.SolonCreationMetadata;
+import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetaServer;
 import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadataOptionItem;
 import org.noear.solon.idea.plugin.initializr.util.StringUtils;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URI;
+import java.text.MessageFormat;
 
 import static java.util.Objects.requireNonNull;
 
@@ -49,18 +64,40 @@ public class ProjectDetails {
     private JComboBox<SolonMetadataOptionItem> ComboBox_Language;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Type;
     private JComboBox<SolonMetadataOptionItem> ComboBox_Packaging;
-
-    private boolean isNameChanged = false;
-    private boolean isGroupChanged = false;
-    private boolean isArtifactChanged = false;
-    private boolean isPackageNameChanged = false;
-
+    private JPanel ServerUrl_Panel;
+    private JBLabel ServerUrl_JBLabel;
     public ProjectDetails(SolonInitializrBuilder moduleBuilder, WizardContext context) {
 
         this.moduleBuilder = moduleBuilder;
         this.wizardContext = context;
         this.metadata = this.moduleBuilder.getMetadata();
+        SolonMetaServer server = this.metadata.getServer();
+        // 创建超链接文本
+        ServerUrl_JBLabel = new JBLabel(server.getTitle());
+        ServerUrl_JBLabel.setForeground(JBColor.BLUE);
+        ServerUrl_JBLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        // 添加鼠标事件监听器，以在点击时打开超链接
+        ServerUrl_JBLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI(server.getUrl()));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                ServerUrl_JBLabel.setText(MessageFormat.format("<html><a href={0}>{1}</a></html>",server.getUrl(),server.getTitle()));
+            }
 
+            @Override
+            public void mouseExited(MouseEvent e) {
+                ServerUrl_JBLabel.setText(server.getTitle());
+            }
+        });
+        ServerUrl_Panel.setLayout(new BorderLayout());
+        ServerUrl_Panel.add(ServerUrl_JBLabel,BorderLayout.CENTER);
         // Init and select default jdk
         if (ComboBox_JDK != null && ComboBox_JDK.getItemCount() > 0 && !ComboBox_JDK.isProjectJdkSelected()) {
             ComboBox_JDK.setSelectedIndex(0);
@@ -73,7 +110,6 @@ public class ProjectDetails {
 
         TextField_Name.setText(this.metadata.getName());
         TextField_Name.addCaretListener(e -> {
-            this.isNameChanged = true;
             this.metadata.setName(TextField_Name.getText());
             LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Name.getText()));
             TextField_Artifact.setText(TextField_Name.getText());
@@ -84,14 +120,12 @@ public class ProjectDetails {
 
         TextField_Group.setText(this.metadata.getGroupId());
         TextField_Group.addCaretListener(e -> {
-            this.isGroupChanged = true;
             this.metadata.setGroupId(TextField_Group.getText());
             TextField_PackageName.setText(TextField_Group.getText() + "." + TextField_Artifact.getText());
         });
 
         TextField_Artifact.setText(this.metadata.getArtifactId());
         TextField_Artifact.addCaretListener(e -> {
-            this.isArtifactChanged = true;
             this.metadata.setArtifactId(TextField_Artifact.getText());
             String artifact = TextField_Artifact.getText();
             if (artifact.contains("-")) {
@@ -102,7 +136,6 @@ public class ProjectDetails {
 
         TextField_PackageName.setText(this.metadata.getPackageName());
         TextField_PackageName.addCaretListener(e -> {
-            this.isPackageNameChanged = true;
             this.metadata.setPackageName(TextField_PackageName.getText());
 
         });

@@ -10,7 +10,7 @@
     <children>
       <component id="bacf" class="javax.swing.JLabel">
         <constraints>
-          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="true "/>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Name:"/>
@@ -108,26 +108,6 @@
         </constraints>
         <properties>
           <text value="Java version:"/>
-        </properties>
-      </component>
-      <component id="a7ea4" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="true"/>
-        </constraints>
-        <properties>
-          <foreground color="-7566196"/>
-          <horizontalAlignment value="10"/>
-          <horizontalTextPosition value="11"/>
-          <text value="&lt;html&gt;&#10;&lt;body&gt;&#10;&lt;b&gt;Solon&lt;/b&gt;, an efficient Java application development framework.&lt;br&gt;&#10;&lt;ul&gt;&#10;&lt;li&gt;Pursue: faster, smaller and simpler&lt;/li&gt;&#10;&lt;li&gt;Advocate: restraint, simplicity, openness and ecology&lt;/li&gt;&#10;&lt;/ul&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;"/>
-        </properties>
-      </component>
-      <component id="89cea" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="true"/>
-        </constraints>
-        <properties>
-          <icon value="image/solonLogo_48.png"/>
-          <text value=""/>
         </properties>
       </component>
       <component id="bd942" class="com.intellij.openapi.roots.ui.configuration.JdkComboBox" binding="ComboBox_JDK" custom-create="true">
@@ -257,6 +237,23 @@
           <model/>
         </properties>
       </component>
+      <component id="32462" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Server url"/>
+        </properties>
+      </component>
+      <grid id="a7c3c" binding="ServerUrl_Panel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children/>
+      </grid>
     </children>
   </grid>
 </form>

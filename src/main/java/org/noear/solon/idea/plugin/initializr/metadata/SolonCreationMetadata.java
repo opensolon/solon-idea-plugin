@@ -9,6 +9,7 @@ import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.pom.java.LanguageLevel;
 import com.intellij.util.io.HttpRequests;
+import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetaServer;
 import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadata;
 import org.noear.solon.idea.plugin.initializr.util.SolonInitializrUtil;
 
@@ -24,7 +25,9 @@ import static com.intellij.psi.impl.PsiNameHelperImpl.getInstance;
  */
 public class SolonCreationMetadata {
 
-    private String serverUrl = "https://solon.noear.org";
+    private final String serverUrl = "https://solon.noear.org";
+
+    private SolonMetaServer server;
 
     private String name;
 
@@ -226,6 +229,14 @@ public class SolonCreationMetadata {
         return this;
     }
 
+    public SolonMetaServer getServer() {
+        return server;
+    }
+
+    public void setServer(SolonMetaServer server) {
+        this.server = server;
+    }
+
     public String buildDownloadUrl() {
         return serverUrl + "/start/build.do" + "?"
                 + SolonInitializrUtil.nameAndValueAsUrlParam("project", this.getType()) + "&"
@@ -247,6 +258,7 @@ public class SolonCreationMetadata {
         String responseText = HttpRequests.request(buildMetadataGetUrl()).readString();
         SolonMetadata solonMetadata = JSON.parseObject(responseText, SolonMetadata.class);
         setInitMetadata(solonMetadata);
+        setServer(solonMetadata.getServer());
         setName(solonMetadata.getArtifact().getDefaultValue());
         setGroupId(solonMetadata.getGroup().getDefaultValue());
         setArtifactId(solonMetadata.getArtifact().getDefaultValue());
