@@ -42,7 +42,6 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
 
         String queryWithDotDelimitedPrefixes = GenericUtil.truncateIdeaDummyIdentifier(element);
         List<LookupElementBuilder> elementBuilders = new ArrayList<>();
-        assert yaml != null;
         String yamlKey = getYamlKey(yaml);
         if (yaml.getParent().getClass() == YAMLKeyValueImpl.class) {
             elementBuilders = suggestionService.findHintSuggestionsForQueryPrefix(yamlKey, queryWithDotDelimitedPrefixes);
@@ -51,7 +50,6 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
             queryWithDotDelimitedPrefixes=queryWithDotDelimitedPrefixes.equals(SUB_OPTION)?yamlKey:yamlKey+queryWithDotDelimitedPrefixes;
             elementBuilders = suggestionService.findYamlSuggestionsForQueryPrefix(queryWithDotDelimitedPrefixes);
         }
-        assert elementBuilders != null;
         elementBuilders.forEach(resultSet::addElement);
     }
 
