@@ -40,7 +40,11 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
 
     @Override
     public boolean isImplicitWrite(@NotNull PsiElement element) {
-        return ((PsiField) element).hasAnnotation("org.noear.solon.annotation.Inject");
+        try{
+            return ((PsiField) element).hasAnnotation("org.noear.solon.annotation.Inject");
+        }catch (ClassCastException exception){
+            return false;
+        }
     }
 
     /**
