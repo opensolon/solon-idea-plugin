@@ -1,5 +1,12 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+## [0.0.5-M1]
+### Added
+- Fix various types of conversion exceptions
+- Yaml code prompts for adding comments
+- Optimize yaml code tips
+
+
 ## [0.0.4]
 ### Added
 - adjust ui

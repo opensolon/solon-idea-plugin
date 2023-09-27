@@ -49,11 +49,15 @@
 
         <postStartupActivity implementation="org.noear.solon.idea.plugin.suggestion.event.SuggestionIndexEvent"/>
 
+
         <implicitUsageProvider implementation="org.noear.solon.idea.plugin.suggestion.service.UsageProviderServiceImpl"/>
     </extensions>
 
     <applicationListeners>
         <listener class="org.noear.solon.idea.plugin.suggestion.event.SuggestionReIndexEvent"
                   topic="com.intellij.openapi.compiler.CompilationStatusListener"/>
+
+        <listener class="org.noear.solon.idea.plugin.suggestion.completion.YamlCompletionProvider"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
 </idea-plugin>
