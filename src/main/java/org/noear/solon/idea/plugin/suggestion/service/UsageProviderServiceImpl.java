@@ -25,12 +25,17 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
      */
     @Override
     public boolean isImplicitUsage(@NotNull PsiElement element) {
-        PsiMethod psiMethod = PsiTreeUtil.getParentOfType(element, PsiMethod.class);
-        if (psiMethod == null) {
-            PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class);
-            return hasAnnotation(psiClass);
+        try {
+            PsiMethod psiMethod = PsiTreeUtil.getParentOfType(element, PsiMethod.class);
+            if (psiMethod == null) {
+                PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class);
+                return hasAnnotation(psiClass);
+            }
+            return hasAnnotation(psiMethod);
+        }catch (RuntimeException exception){
+            return false;
         }
-        return hasAnnotation(psiMethod);
+
     }
 
     @Override

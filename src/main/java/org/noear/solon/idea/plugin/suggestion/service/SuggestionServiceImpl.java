@@ -16,11 +16,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.jetbrains.annotations.Nullable;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
+import org.noear.solon.idea.plugin.suggestion.completion.YamlCompletionContributor;
 import org.noear.solon.idea.plugin.suggestion.metadata.MetadataContainer;
 import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadata;
 import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataHint;
 import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataHintValue;
 import org.noear.solon.idea.plugin.suggestion.metadata.json.SolonConfigurationMetadataProperty;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -211,27 +213,42 @@ public class SuggestionServiceImpl implements SuggestionService {
                 int endOffset = context.getTailOffset();
                 Document document = editor.getDocument();
                 String text = item.getLookupString();
-                boolean lastDot=queryWithDotDelimitedPrefixes.length() == queryWithDotDelimitedPrefixes.lastIndexOf(".") + 1;
-                boolean queryNotEmpty = queryWithDotDelimitedPrefixes.length() > 1;
+                boolean lastDot = queryWithDotDelimitedPrefixes.length() == queryWithDotDelimitedPrefixes.lastIndexOf(".") + 1;
+/*                boolean queryNotEmpty = queryWithDotDelimitedPrefixes.length() > 1;
                 int queryLength = queryNotEmpty ? (queryWithDotDelimitedPrefixes.length() - 1) : queryWithDotDelimitedPrefixes.length();
-                String query = lastDot?
+                String query = lastDot ?
                         queryWithDotDelimitedPrefixes.substring(0, queryLength) : queryWithDotDelimitedPrefixes;
-                String supplementText = text.substring(lastDot?query.length():query.length()-1);
-                supplementText=supplementText.indexOf(".")==0?supplementText.substring(1):supplementText;
-                String[] count = supplementText.split(DELIMITER);
+                String supplementText = text.substring(lastDot ? query.length() : query.length() - 1);
+                supplementText = supplementText.indexOf(".") == 0 ? supplementText.substring(1) : supplementText;*/
+                String[] supplementTextArr = text.split(DELIMITER);
                 StringBuffer resultText = new StringBuffer();
-                for (int i = 0; i < count.length; i++) {
-                    resultText.append(count[i]);
+                String[] prefixArr = queryWithDotDelimitedPrefixes.split(DELIMITER);
+                Map stringStringMap = YamlCompletionContributor.yamlMapCache.get(context.getFile().getName());
+                for (int i = 0; i < supplementTextArr.length; i++) {
+                    if (stringStringMap != null && i < prefixArr.length && stringStringMap.get(prefixArr[i]) != null) {
+                        stringStringMap = (Map) stringStringMap.get(prefixArr[i]);
+                        continue;
+                    }
+//                    if(i<prefixArr.length && supplementTextArr[i].equals(prefixArr[i])){
+//                        allYamlTemplate.append(supplementTextArr[i]);
+//                        allYamlTemplate.append(YML_DELIMITER);
+//                        allYamlTemplate.append(LINE);
+//                        allYamlTemplate.append(YML_FORMAT.repeat(i + 1));
+//                        continue;
+//                    }
+                    resultText.append(supplementTextArr[i]);
                     resultText.append(YML_DELIMITER);
-                    if (i == count.length - 1) {
+
+                    if (i == supplementTextArr.length - 1) {
                         break;
                     }
                     resultText.append(LINE);
                     resultText.append(YML_FORMAT.repeat(i + 1));
+
                 }
                 text = resultText.toString();
-                document.replaceString(lastDot?startOffset-1:startOffset, endOffset, text);
-                editor.getCaretModel().moveToOffset(startOffset + (lastDot?text.length()-1:text.length()));
+                document.replaceString(lastDot ? startOffset - 1 : startOffset, endOffset, text);
+                editor.getCaretModel().moveToOffset(startOffset + (lastDot ? text.length() - 1 : text.length()));
             }));
         }
         return builders;
@@ -254,7 +271,7 @@ public class SuggestionServiceImpl implements SuggestionService {
     private LookupElementBuilder toLookupElementBuilder(SolonConfigurationMetadataProperty property) {
         LookupElementBuilder builder = LookupElementBuilder.create(property.getName());
         if (property.getDescription() != null) {
-            builder.withTypeText(property.getDescription(), true);
+            builder = builder.withTypeText(property.getDescription(), true);
         }
         return builder;
     }
