@@ -129,7 +129,7 @@ public class SuggestionServiceImpl implements SuggestionService {
                 SolonConfigurationMetadata solonConfigurationMetadata = JSON.parseObject(new BufferedReader(new InputStreamReader(inputStream)), SolonConfigurationMetadata.class);
                 buildMetadataHierarchy(module, solonConfigurationMetadata);
             } catch (IOException e) {
-                LoggerUtil.getLogger(this.getClass()).error("Exception encountered while processing metadata file: " + metadataFilePath, e);
+                LoggerUtil.getLogger(this.getClass()).infoWithDebug("Exception encountered while processing metadata file: " + metadataFilePath, e);
             }
         }
     }
