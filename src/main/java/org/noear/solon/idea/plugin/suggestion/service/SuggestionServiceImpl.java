@@ -2,6 +2,7 @@ package org.noear.solon.idea.plugin.suggestion.service;
 
 import com.alibaba.fastjson2.JSON;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -10,11 +11,14 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.encoding.EncodingProjectManager;
 import org.apache.commons.collections4.Trie;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mozilla.javascript.Context;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
 import org.noear.solon.idea.plugin.suggestion.completion.YamlCompletionContributor;
 import org.noear.solon.idea.plugin.suggestion.metadata.MetadataContainer;
@@ -28,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Future;
 
@@ -271,6 +276,9 @@ public class SuggestionServiceImpl implements SuggestionService {
     private LookupElementBuilder toLookupElementBuilder(SolonConfigurationMetadataProperty property) {
         LookupElementBuilder builder = LookupElementBuilder.create(property.getName());
         if (property.getDescription() != null) {
+//            @NotNull Project[] openProjects = ProjectUtil.getOpenProjects();
+//            EncodingProjectManager encodingManager = EncodingProjectManager.getInstance(openProjects[0]);
+
             builder = builder.withTypeText(property.getDescription(), true);
         }
         return builder;

@@ -29,13 +29,11 @@ import org.yaml.snakeyaml.Yaml;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class YamlCompletionProvider extends CompletionProvider<CompletionParameters> implements FileEditorManagerListener {
 
     private final String SUB_OPTION = ".";
 
-    private SuggestionService suggestionService;
     private DocumentListener yamlDocumentListener;
     @Override
     public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
@@ -72,21 +70,6 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
         }
     }
 
-//    @Override
-//    public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-//        // 检查文件是否是 YAML 文件
-//        if (file.getFileType().getName().equalsIgnoreCase(SolonYamlFileType.INSTANCE.getName())) {
-//            // 这里可以执行你的逻辑，当打开 YAML 文件时触发
-//            System.out.println("YAML file opened: " + file.getName());
-//            FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
-//            Document document = fileDocumentManager.getDocument(file);
-//            assert document != null;
-//            YamlCompletionContributor.yamlMapCache.remove(file.getName());
-//            assert yamlDocumentListener != null;
-//            document.removeDocumentListener(yamlDocumentListener);
-//        }
-//    }
-
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet resultSet) {
         PsiElement element = parameters.getPosition();
@@ -94,13 +77,13 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
             return;
         }
 
-        SuggestionService suggestionService = getService(element);
-
+//        SuggestionService suggestionService = getService(element);
+        Project project = element.getProject();
+        SuggestionService suggestionService = SuggestionService.getInstance(project);
         if (!suggestionService.canProvideSuggestions()) {
             return;
         }
 
-//        YAMLPlainTextImpl yaml = getParentOfType(element, YAMLPlainTextImpl.class);
         YAMLPlainTextImpl yaml = PsiTreeUtil.getParentOfType(element, YAMLPlainTextImpl.class);
         String queryWithDotDelimitedPrefixes = GenericUtil.truncateIdeaDummyIdentifier(element);
         List<LookupElementBuilder> elementBuilders = new ArrayList<>();
@@ -115,21 +98,12 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
         elementBuilders.forEach(resultSet::addElement);
     }
 
-    private SuggestionService getService(PsiElement element) {
-        return Optional.ofNullable(suggestionService).orElseGet(() -> {
-            Project project = element.getProject();
-            SuggestionService suggestionService = SuggestionService.getInstance(project);
-            return suggestionService;
-        });
-    }
-
-
     private String getYamlKey(YAMLPlainTextImpl yamlPlainText) {
         if (yamlPlainText == null) {
             return "";
         }
         List<String> keys = new ArrayList<>();
-        PsiElement parent = yamlPlainText.getParent();
+        PsiElement parent = yamlPlainText.getFirstChild();
         StringBuffer yamlKey = new StringBuffer();
         while (parent != null) {
             if (parent instanceof YAMLKeyValue) {
@@ -138,7 +112,7 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
                 keys.add(key);
             }
             try {
-                parent = parent.getParent();
+                parent = parent.getFirstChild();
             } catch (Exception ex) {
                 parent = null;
             }
