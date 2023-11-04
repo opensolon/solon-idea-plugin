@@ -22,6 +22,8 @@ import org.jetbrains.yaml.psi.YAMLKeyValue;
 import org.jetbrains.yaml.psi.impl.YAMLBlockMappingImpl;
 import org.jetbrains.yaml.psi.impl.YAMLPlainTextImpl;
 import org.noear.solon.idea.plugin.common.util.GenericUtil;
+import org.noear.solon.idea.plugin.common.util.LoggerUtil;
+import org.noear.solon.idea.plugin.initializr.util.SolonInitializrUtil;
 import org.noear.solon.idea.plugin.suggestion.filetype.SolonYamlFileType;
 import org.noear.solon.idea.plugin.suggestion.service.SuggestionService;
 import org.yaml.snakeyaml.Yaml;
@@ -35,8 +37,10 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
     private final String SUB_OPTION = ".";
 
     private DocumentListener yamlDocumentListener;
+
     @Override
-    public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+    public void fileOpenedSync(@NotNull FileEditorManager source, @NotNull VirtualFile file,
+                               @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
         // 检查文件是否是 YAML 文件
         if (file.getFileType().getName().equalsIgnoreCase(SolonYamlFileType.INSTANCE.getName())) {
             // 这里可以执行你的逻辑，当打开 YAML 文件时触发
@@ -45,23 +49,24 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
             Document document = fileDocumentManager.getDocument(file);
             assert document != null;
             String text = document.getText();
-            try{
+            try {
                 Yaml yaml = new Yaml();
                 Map yamlMap = yaml.load(text);
-                YamlCompletionContributor.yamlMapCache.put(file.getName(),yamlMap);
-            }catch (RuntimeException ignored){
+                YamlCompletionContributor.yamlMapCache.put(file.getName(), yamlMap);
+            } catch (RuntimeException ignored) {
+                LoggerUtil.debug(this.getClass(), logger -> logger.debug("yaml get fail"));
 
             }
-            yamlDocumentListener=new DocumentListener() {
+            yamlDocumentListener = new DocumentListener() {
                 @Override
                 public void documentChanged(@NotNull DocumentEvent event) {
                     DocumentListener.super.documentChanged(event);
                     String text = event.getDocument().getText();
-                    try{
+                    try {
                         Yaml yaml = new Yaml();
                         Map yamlMap = yaml.load(text);
-                        YamlCompletionContributor.yamlMapCache.put(file.getName(),yamlMap);
-                    }catch (RuntimeException ignored){
+                        YamlCompletionContributor.yamlMapCache.put(file.getName(), yamlMap);
+                    } catch (RuntimeException ignored) {
 
                     }
                 }
@@ -85,6 +90,9 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
         }
 
         YAMLPlainTextImpl yaml = PsiTreeUtil.getParentOfType(element, YAMLPlainTextImpl.class);
+        if (yaml == null) {
+            return;
+        }
         String queryWithDotDelimitedPrefixes = GenericUtil.truncateIdeaDummyIdentifier(element);
         List<LookupElementBuilder> elementBuilders = new ArrayList<>();
         String yamlKey = getYamlKey(yaml);

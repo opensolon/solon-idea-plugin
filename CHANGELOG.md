@@ -1,10 +1,19 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+
+## [0.0.6-M4]
+### Added
+- Code prompt garbled
+- Fix configuration issues under native project
+- Fix the issue of occasionally not displaying configuration prompts
+
+
 ## [0.0.6-M3]
 ### Added
 - Fix configuration issues under native project
 - Fix the issue of occasionally not displaying configuration prompts
-- 
+
+
 ## [0.0.6-M2]
 ### Added
 - Code prompt garbled
