@@ -13,6 +13,8 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +22,8 @@ import org.jetbrains.yaml.psi.YAMLKeyValue;
 import org.jetbrains.yaml.psi.impl.YAMLBlockMappingImpl;
 import org.jetbrains.yaml.psi.impl.YAMLPlainTextImpl;
 import org.noear.solon.idea.plugin.common.util.GenericUtil;
+import org.noear.solon.idea.plugin.common.util.LoggerUtil;
+import org.noear.solon.idea.plugin.initializr.util.SolonInitializrUtil;
 import org.noear.solon.idea.plugin.suggestion.filetype.SolonYamlFileType;
 import org.noear.solon.idea.plugin.suggestion.service.SuggestionService;
 import org.yaml.snakeyaml.Yaml;
@@ -27,16 +31,16 @@ import org.yaml.snakeyaml.Yaml;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class YamlCompletionProvider extends CompletionProvider<CompletionParameters> implements FileEditorManagerListener {
 
     private final String SUB_OPTION = ".";
 
-    private SuggestionService suggestionService;
     private DocumentListener yamlDocumentListener;
+
     @Override
-    public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+    public void fileOpenedSync(@NotNull FileEditorManager source, @NotNull VirtualFile file,
+                               @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
         // 检查文件是否是 YAML 文件
         if (file.getFileType().getName().equalsIgnoreCase(SolonYamlFileType.INSTANCE.getName())) {
             // 这里可以执行你的逻辑，当打开 YAML 文件时触发
@@ -45,42 +49,29 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
             Document document = fileDocumentManager.getDocument(file);
             assert document != null;
             String text = document.getText();
-            try{
+            try {
                 Yaml yaml = new Yaml();
                 Map yamlMap = yaml.load(text);
-                YamlCompletionContributor.yamlMapCache.put(file.getName(),yamlMap);
-            }catch (RuntimeException ignored){
+                YamlCompletionContributor.yamlMapCache.put(file.getName(), yamlMap);
+            } catch (RuntimeException ignored) {
+                LoggerUtil.debug(this.getClass(), logger -> logger.debug("yaml get fail"));
 
             }
-            yamlDocumentListener=new DocumentListener() {
+            yamlDocumentListener = new DocumentListener() {
                 @Override
                 public void documentChanged(@NotNull DocumentEvent event) {
                     DocumentListener.super.documentChanged(event);
                     String text = event.getDocument().getText();
-                    try{
+                    try {
                         Yaml yaml = new Yaml();
                         Map yamlMap = yaml.load(text);
-                        YamlCompletionContributor.yamlMapCache.put(file.getName(),yamlMap);
-                    }catch (RuntimeException ignored){
+                        YamlCompletionContributor.yamlMapCache.put(file.getName(), yamlMap);
+                    } catch (RuntimeException ignored) {
 
                     }
                 }
             };
             document.addDocumentListener(yamlDocumentListener);
-        }
-    }
-
-    @Override
-    public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-        // 检查文件是否是 YAML 文件
-        if (file.getFileType().getName().equalsIgnoreCase(SolonYamlFileType.INSTANCE.getName())) {
-            // 这里可以执行你的逻辑，当打开 YAML 文件时触发
-            System.out.println("YAML file opened: " + file.getName());
-            FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
-            Document document = fileDocumentManager.getDocument(file);
-            assert document != null;
-            YamlCompletionContributor.yamlMapCache.remove(file.getName());
-            document.removeDocumentListener(yamlDocumentListener);
         }
     }
 
@@ -91,14 +82,17 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
             return;
         }
 
-        SuggestionService suggestionService = getService(element);
-
+//        SuggestionService suggestionService = getService(element);
+        Project project = element.getProject();
+        SuggestionService suggestionService = SuggestionService.getInstance(project);
         if (!suggestionService.canProvideSuggestions()) {
             return;
         }
 
-        YAMLPlainTextImpl yaml = getParentOfType(element, YAMLPlainTextImpl.class);
-
+        YAMLPlainTextImpl yaml = PsiTreeUtil.getParentOfType(element, YAMLPlainTextImpl.class);
+        if (yaml == null) {
+            return;
+        }
         String queryWithDotDelimitedPrefixes = GenericUtil.truncateIdeaDummyIdentifier(element);
         List<LookupElementBuilder> elementBuilders = new ArrayList<>();
         String yamlKey = getYamlKey(yaml);
@@ -112,21 +106,12 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
         elementBuilders.forEach(resultSet::addElement);
     }
 
-    private SuggestionService getService(PsiElement element) {
-        return Optional.ofNullable(suggestionService).orElseGet(() -> {
-            Project project = element.getProject();
-            SuggestionService suggestionService = SuggestionService.getInstance(project);
-            return suggestionService;
-        });
-    }
-
-
     private String getYamlKey(YAMLPlainTextImpl yamlPlainText) {
         if (yamlPlainText == null) {
             return "";
         }
         List<String> keys = new ArrayList<>();
-        PsiElement parent = yamlPlainText.getParent();
+        PsiElement parent = yamlPlainText.getFirstChild();
         StringBuffer yamlKey = new StringBuffer();
         while (parent != null) {
             if (parent instanceof YAMLKeyValue) {
@@ -135,7 +120,7 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
                 keys.add(key);
             }
             try {
-                parent = parent.getParent();
+                parent = parent.getFirstChild();
             } catch (Exception ex) {
                 parent = null;
             }

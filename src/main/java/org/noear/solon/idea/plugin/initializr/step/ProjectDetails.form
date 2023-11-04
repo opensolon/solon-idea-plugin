@@ -213,22 +213,6 @@
           <text value="{basePath}/{name}"/>
         </properties>
       </component>
-      <component id="f1b12" class="javax.swing.JComboBox" binding="ComboBox_Type">
-        <constraints>
-          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="true"/>
-        </constraints>
-        <properties>
-          <model/>
-        </properties>
-      </component>
-      <component id="cc8b5" class="javax.swing.JComboBox" binding="ComboBox_Language">
-        <constraints>
-          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="true"/>
-        </constraints>
-        <properties>
-          <model/>
-        </properties>
-      </component>
       <component id="65dcd" class="javax.swing.JComboBox" binding="ComboBox_Packaging">
         <constraints>
           <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="9" fill="0" indent="0" use-parent-layout="true"/>
@@ -254,6 +238,22 @@
         <border type="none"/>
         <children/>
       </grid>
+      <component id="cc8b5" class="javax.swing.JComboBox" binding="ComboBox_Language">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="true"/>
+        </constraints>
+        <properties>
+          <model/>
+        </properties>
+      </component>
+      <component id="f1b12" class="javax.swing.JComboBox" binding="ComboBox_Type">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="true"/>
+        </constraints>
+        <properties>
+          <model/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>

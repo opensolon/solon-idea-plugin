@@ -1,5 +1,48 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+
+## [0.0.6-M4]
+### Added
+- Code prompt garbled
+- Fix configuration issues under native project
+- Fix the issue of occasionally not displaying configuration prompts
+
+
+## [0.0.6-M3]
+### Added
+- Fix configuration issues under native project
+- Fix the issue of occasionally not displaying configuration prompts
+
+
+## [0.0.6-M2]
+### Added
+- Code prompt garbled
+
+## [0.0.6-M1]
+### Added
+- Code prompt garbled
+
+## [0.0.5]
+### Added
+- Fix exceptions
+- Fix various types of conversion exceptions
+- Yaml code prompts for adding comments
+- Optimize yaml code tips
+- ui formate
+
+## [0.0.5-M4]
+### Added
+- Fix exceptions
+
+## [0.0.5-M3]
+### Added
+- Fix exceptions
+
+## [0.0.5-M2]
+### Added
+- Fix various types of conversion exceptions
+- ui formate
+
 ## [0.0.5-M1]
 ### Added
 - Fix various types of conversion exceptions
