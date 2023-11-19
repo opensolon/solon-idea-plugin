@@ -43,8 +43,8 @@ public class ProjectDetailsStep extends ModuleWizardStep implements Disposable {
     @Override
     public void updateDataModel() {
         this.wizardContext.setProjectJdk(this.metadata.getSdk());
-        this.wizardContext.setProjectName(this.metadata.getName());
-        this.wizardContext.setProjectFileDirectory(this.metadata.getLocation() + File.separator + this.metadata.getName());
+        this.wizardContext.setProjectName(this.metadata.getArtifactId());
+        this.wizardContext.setProjectFileDirectory(this.metadata.getLocation() + File.separator + this.metadata.getArtifactId());
     }
 
     @Override

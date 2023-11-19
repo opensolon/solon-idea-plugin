@@ -50,7 +50,6 @@ public class ProjectDetails {
     private final SolonInitializrBuilder moduleBuilder;
     private final SolonCreationMetadata metadata;
     private JPanel Panel_Root;
-    private JBTextField TextField_Name;
     private TextFieldWithBrowseButton TextField_Location;
     private JBTextField TextField_Group;
     private JBTextField TextField_Artifact;
@@ -66,6 +65,7 @@ public class ProjectDetails {
     private JComboBox<SolonMetadataOptionItem> ComboBox_Packaging;
     private JPanel ServerUrl_Panel;
     private JBLabel ServerUrl_JBLabel;
+
     public ProjectDetails(SolonInitializrBuilder moduleBuilder, WizardContext context) {
 
         this.moduleBuilder = moduleBuilder;
@@ -86,9 +86,10 @@ public class ProjectDetails {
                     ex.printStackTrace();
                 }
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
-                ServerUrl_JBLabel.setText(MessageFormat.format("<html><a href={0}>{1}</a></html>",server.getUrl(),server.getTitle()));
+                ServerUrl_JBLabel.setText(MessageFormat.format("<html><a href={0}>{1}</a></html>", server.getUrl(), server.getTitle()));
             }
 
             @Override
@@ -97,7 +98,7 @@ public class ProjectDetails {
             }
         });
         ServerUrl_Panel.setLayout(new BorderLayout());
-        ServerUrl_Panel.add(ServerUrl_JBLabel,BorderLayout.CENTER);
+        ServerUrl_Panel.add(ServerUrl_JBLabel, BorderLayout.CENTER);
         // Init and select default jdk
         if (ComboBox_JDK != null && ComboBox_JDK.getItemCount() > 0 && !ComboBox_JDK.isProjectJdkSelected()) {
             ComboBox_JDK.setSelectedIndex(0);
@@ -107,16 +108,6 @@ public class ProjectDetails {
                 this.metadata.setSdk(ComboBox_JDK.getSelectedJdk());
             });
         }
-
-        TextField_Name.setText(this.metadata.getName());
-        TextField_Name.addCaretListener(e -> {
-            this.metadata.setName(TextField_Name.getText());
-            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Name.getText()));
-            TextField_Artifact.setText(TextField_Name.getText());
-        });
-
-
-        LocationTips.setText(StringUtils.PathStrAssemble(this.metadata.getLocation(),TextField_Name.getText()));
 
         TextField_Group.setText(this.metadata.getGroupId());
         TextField_Group.addCaretListener(e -> {
@@ -129,10 +120,13 @@ public class ProjectDetails {
             this.metadata.setArtifactId(TextField_Artifact.getText());
             String artifact = TextField_Artifact.getText();
             if (artifact.contains("-")) {
-                artifact=artifact.replace("-","_");
+                artifact = artifact.replace("-", "_");
             }
             TextField_PackageName.setText(TextField_Group.getText() + "." + artifact);
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Artifact.getText()));
         });
+
+        LocationTips.setText(StringUtils.PathStrAssemble(this.metadata.getLocation(), TextField_Artifact.getText()));
 
         TextField_PackageName.setText(this.metadata.getPackageName());
         TextField_PackageName.addCaretListener(e -> {
@@ -176,14 +170,16 @@ public class ProjectDetails {
         });
 
         TextField_Location.setText(this.metadata.getLocation());
+        // 选择文件路径后的监听
         TextField_Location.addActionListener(e -> {
             this.metadata.setLocation(TextField_Location.getText());
-            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Name.getText()));
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Artifact.getText()));
         });
 
+        // 直接修改框内值的监听
         TextField_Location.getTextField().addCaretListener(e -> {
             this.metadata.setLocation(TextField_Location.getText());
-            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Name.getText()));
+            LocationTips.setText(StringUtils.PathStrAssemble(TextField_Location.getText(), TextField_Artifact.getText()));
         });
 
         if (metadata.getInitMetadata() != null) {
@@ -246,9 +242,7 @@ public class ProjectDetails {
 
     public boolean validate(ModuleBuilder moduleBuilder, WizardContext wizardContext)
             throws ConfigurationException {
-        if (!this.metadata.hasValidName()) {
-            throw new ConfigurationException("Invalid name", "Invalid Data");
-        } else if (!this.metadata.hasValidLocation()) {
+        if (!this.metadata.hasValidLocation()) {
             throw new ConfigurationException("Invalid location", "Invalid Data");
         } else if (!this.metadata.hasValidGroupId()) {
             throw new ConfigurationException("Invalid group id", "Invalid Data");
