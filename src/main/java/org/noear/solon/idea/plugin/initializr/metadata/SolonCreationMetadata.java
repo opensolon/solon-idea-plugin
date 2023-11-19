@@ -102,13 +102,13 @@ public class SolonCreationMetadata {
         return true;
     }
 
-    public String getName() {
-        return name;
-    }
+//    public String getName() {
+//        return name;
+//    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+//    public void setName(String name) {
+//        this.name = name;
+//    }
 
     public String getLocation() {
         return location;
@@ -259,7 +259,7 @@ public class SolonCreationMetadata {
         SolonMetadata solonMetadata = JSON.parseObject(responseText, SolonMetadata.class);
         setInitMetadata(solonMetadata);
         setServer(solonMetadata.getServer());
-        setName(solonMetadata.getArtifact().getDefaultValue());
+//        setName(solonMetadata.getArtifact().getDefaultValue());
         setGroupId(solonMetadata.getGroup().getDefaultValue());
         setArtifactId(solonMetadata.getArtifact().getDefaultValue());
         setPackageName(solonMetadata.getPackageName().getDefaultValue());
