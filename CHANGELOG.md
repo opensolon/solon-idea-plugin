@@ -1,5 +1,9 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+## [0.0.7-M1]
+### Updated
+- Modify the initializer interface
+
 ## [0.0.6]
 ### Added
 - Code prompt garbled
