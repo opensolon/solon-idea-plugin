@@ -7,23 +7,23 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.openapi.fileEditor.*;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.FileOpenedSyncListener;
+import com.intellij.openapi.fileEditor.ex.FileEditorWithProvider;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
 import org.jetbrains.yaml.psi.impl.YAMLBlockMappingImpl;
 import org.jetbrains.yaml.psi.impl.YAMLPlainTextImpl;
 import org.noear.solon.idea.plugin.common.util.GenericUtil;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
-import org.noear.solon.idea.plugin.initializr.util.SolonInitializrUtil;
 import org.noear.solon.idea.plugin.suggestion.filetype.SolonYamlFileType;
 import org.noear.solon.idea.plugin.suggestion.service.SuggestionService;
 import org.yaml.snakeyaml.Yaml;
@@ -32,15 +32,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class YamlCompletionProvider extends CompletionProvider<CompletionParameters> implements FileEditorManagerListener {
+public class YamlCompletionProvider extends CompletionProvider<CompletionParameters> implements FileOpenedSyncListener {
 
     private final String SUB_OPTION = ".";
 
-    private DocumentListener yamlDocumentListener;
 
     @Override
-    public void fileOpenedSync(@NotNull FileEditorManager source, @NotNull VirtualFile file,
-                               @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
+    public void fileOpenedSync(@NotNull FileEditorManager source, @NotNull VirtualFile file, @NotNull List<FileEditorWithProvider> editorsWithProviders) {
         // 检查文件是否是 YAML 文件
         if (file.getFileType().getName().equalsIgnoreCase(SolonYamlFileType.INSTANCE.getName())) {
             // 这里可以执行你的逻辑，当打开 YAML 文件时触发
@@ -57,7 +55,7 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
                 LoggerUtil.debug(this.getClass(), logger -> logger.debug("yaml get fail"));
 
             }
-            yamlDocumentListener = new DocumentListener() {
+            DocumentListener yamlDocumentListener = new DocumentListener() {
                 @Override
                 public void documentChanged(@NotNull DocumentEvent event) {
                     DocumentListener.super.documentChanged(event);
@@ -141,4 +139,7 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
         }
         return (T) element;
     }
+
+
+
 }
