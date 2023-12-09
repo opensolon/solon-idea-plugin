@@ -1,5 +1,11 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+## [0.0.7-M2]
+### Updated
+- Initializer UI optimization
+- Compatible with version 2023.3
+- Abandon using abandoned interfaces
+
 ## [0.0.7-M1]
 ### Updated
 - Modify the initializer interface

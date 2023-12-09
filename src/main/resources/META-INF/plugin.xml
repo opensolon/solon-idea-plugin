@@ -58,6 +58,6 @@
                   topic="com.intellij.openapi.compiler.CompilationStatusListener"/>
 
         <listener class="org.noear.solon.idea.plugin.suggestion.completion.YamlCompletionProvider"
-                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+                  topic="com.intellij.openapi.fileEditor.FileOpenedSyncListener"/>
     </applicationListeners>
 </idea-plugin>
