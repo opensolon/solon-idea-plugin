@@ -1,5 +1,8 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+## [0.0.8]
+### Updated
+- Fix bug in initializer
 
 ## [0.0.7]
 ### Updated

@@ -136,7 +136,7 @@ public class ProjectDetails {
 
         ComboBox_Archetype.setSelectedItem(this.metadata.getJavaVersion());
         ComboBox_Archetype.addActionListener(e -> {
-            this.metadata.setJavaVersion(ComboBox_Archetype.getItemAt(ComboBox_Archetype.getSelectedIndex()).getValue());
+            this.metadata.setDependency(ComboBox_Archetype.getItemAt(ComboBox_Archetype.getSelectedIndex()).getValue());
         });
 
         ComboBox_SolonVer.setSelectedItem(this.metadata.getJavaVersion());
