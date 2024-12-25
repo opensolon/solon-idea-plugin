@@ -1,5 +1,13 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+## [0.0.11-M1]
+### Updated
+- IDEA 243.* version support
+
+## [0.0.10]
+### Updated
+- IDEA 242.* version support
+
 ## [0.0.9]
 ### Updated
 - IDEA 241.* version support
