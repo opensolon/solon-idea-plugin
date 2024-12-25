@@ -11,6 +11,7 @@ import com.intellij.openapi.projectRoots.JavaSdkType;
 import com.intellij.openapi.projectRoots.JavaSdkVersion;
 import com.intellij.openapi.roots.ui.configuration.JdkComboBox;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel;
+import com.intellij.openapi.ui.ComponentWithBrowseButton;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.NlsSafe;
@@ -209,8 +210,7 @@ public class ProjectDetails {
             ComboBox_Packaging.setSelectedItem(metadata.getInitMetadata().getPackaging().getByValue(metadata.getInitMetadata().getPackaging().getDefaultValue()));
         }
 
-        TextField_Location.addBrowseFolderListener(null, null, context.getProject(), FileChooserDescriptorFactory.createSingleFolderDescriptor(), new TextComponentAccessor<JTextField>() {
-
+        TextField_Location.addActionListener(new ComponentWithBrowseButton.BrowseFolderActionListener(null, null, TextField_Location, context.getProject(), FileChooserDescriptorFactory.createSingleFolderDescriptor(), new TextComponentAccessor<JTextField>() {
             @Override
             public @NlsSafe String getText(JTextField jTextField) {
                 return jTextField.getText();
@@ -222,7 +222,7 @@ public class ProjectDetails {
                 metadata.setLocation(jTextField.getText());
             }
 
-        });
+        }));
     }
 
     public JPanel getRoot() {
