@@ -1,5 +1,11 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 # Solon Changelog
+
+## [0.0.12]
+### Updated
+- IDEA 243.* version support
+- Replace deprecated interfaces
+
 ## [0.0.11]
 ### Updated
 - IDEA 243.* version support
