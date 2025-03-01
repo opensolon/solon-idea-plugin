@@ -11,12 +11,23 @@
     <depends config-file="maven.xml" optional="true">org.jetbrains.idea.maven</depends>
     <depends config-file="gradle.xml" optional="true">com.intellij.gradle</depends>
 
+    <projectListeners>
+        <listener
+                class="org.noear.solon.idea.plugin.metadata.service.ModuleDependenciesWatcher"
+                topic="com.intellij.platform.backend.workspace.WorkspaceModelChangeListener"/>
+    </projectListeners>
+
     <extensionPoints>
         <extensionPoint qualifiedName="solon.initializr.moduleBuilderPostProcessor"
                         interface="org.noear.solon.idea.plugin.initializr.processor.ModuleBuilderPostProcessor"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
+
+        <indexedRootsProvider
+                implementation="org.noear.solon.idea.plugin.metadata.source.MetadataFileIndexConfigurator"/>
+        <fileBasedIndex
+                implementation="org.noear.solon.idea.plugin.metadata.source.MetadataFileIndex"/>
 
         <projectService
                 serviceInterface="org.noear.solon.idea.plugin.suggestion.service.SuggestionService"
@@ -51,6 +62,10 @@
 
 
         <implicitUsageProvider implementation="org.noear.solon.idea.plugin.suggestion.service.UsageProviderServiceImpl"/>
+
+        <moduleService
+                serviceInterface="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService"
+                serviceImplementation="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataServiceImpl"/>
     </extensions>
 
     <applicationListeners>
