@@ -46,6 +46,12 @@
                   extensions="yaml,yml"
                   patterns="app-*.yaml;app-*.yml"/>
 
+        <psi.referenceContributor
+                language="yaml"
+                implementation="org.noear.solon.idea.plugin.navigation.YamlReferenceContributor"/>
+        <referencesSearch
+                implementation="org.noear.solon.idea.plugin.navigation.PsiToYamlKeySearcher"/>
+
         <completion.contributor
                 language="Properties"
                 implementationClass="org.noear.solon.idea.plugin.suggestion.completion.PropertiesCompletionContributor"/>
