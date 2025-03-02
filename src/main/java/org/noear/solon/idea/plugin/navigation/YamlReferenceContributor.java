@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.YAMLLanguage;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
 import org.noear.solon.idea.plugin.suggestion.filetype.SolonPropertiesFileType;
+import org.noear.solon.idea.plugin.suggestion.filetype.SolonYamlFileType;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 import static com.intellij.patterns.PsiJavaPatterns.virtualFile;
@@ -17,10 +18,11 @@ public class YamlReferenceContributor extends PsiReferenceContributor {
 
   @Override
   public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
+    System.err.println("registerReferenceProviders");
     PsiElementPattern.Capture<YAMLKeyValue> pattern =
         psiElement(YAMLKeyValue.class)
             .withLanguage(YAMLLanguage.INSTANCE)
-            .inVirtualFile(virtualFile().ofType(SolonPropertiesFileType.INSTANCE));
+            .inVirtualFile(virtualFile().ofType(SolonYamlFileType.INSTANCE));
     registrar.registerReferenceProvider(pattern, new PsiReferenceProvider() {
       @Override
       @NotNull

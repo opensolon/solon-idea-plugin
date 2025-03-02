@@ -30,15 +30,20 @@ public class YamlKeyToPsiReference extends PsiReferenceBase<PsiElement> {
   @Override
   public @Nullable PsiElement resolve() {
     if (module == null) {
+      System.err.println("Module is null for key: " + yamlKeyValue.getKeyText());
       return null;
     }
 
     ModuleMetadataService metadataService = module.getService(ModuleMetadataService.class);
+    metadataService.refreshAfterIndexing();
     MetadataIndex metadata = metadataService.getIndex();
     String fullName = YAMLUtil.getConfigFullName(yamlKeyValue);
 
     MetadataItem propertyOrGroup = metadata.getPropertyOrGroup(fullName);
-    if (propertyOrGroup == null) return null;
+    if (propertyOrGroup == null) {
+      System.err.println("MetadataService is null for module: " + module.getName());
+      return null;
+    }
     if (propertyOrGroup instanceof MetadataProperty property) {
       return property.getSourceField().orElse(null);
     } else {

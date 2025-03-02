@@ -16,4 +16,6 @@ public interface ModuleMetadataService {
    */
   @NotNull MetadataIndex getIndex();
 
+  void refreshAfterIndexing();
+
 }

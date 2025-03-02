@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.yaml.YAMLUtil;
 import org.jetbrains.yaml.psi.*;
 import org.noear.solon.idea.plugin.suggestion.filetype.SolonPropertiesFileType;
+import org.noear.solon.idea.plugin.suggestion.filetype.SolonYamlFileType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -56,7 +57,7 @@ public final class PsiToYamlKeyReferenceService {
 
   private Map<String, Set<YamlKeyToNullReference>> refreshIndex() {
     Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(
-        () -> FileTypeIndex.getFiles(SolonPropertiesFileType.INSTANCE,
+        () -> FileTypeIndex.getFiles(SolonYamlFileType.INSTANCE,
             GlobalSearchScope.projectScope(project)));
 
     if (this.indexHolder == null || !this.indexHolder.isEquals(files)) {

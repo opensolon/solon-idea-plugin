@@ -81,7 +81,7 @@ public class PsiElementUtils {
   private static @Nullable PsiDocComment getDocComment(PsiJavaDocumentedElement docOwner) {
     PsiElement navElement = docOwner.getNavigationElement();
     if (!(navElement instanceof PsiJavaDocumentedElement)) {
-      LOG.info("Wrong navElement: " + navElement + "; original = " + docOwner + " of class " + docOwner.getClass());
+      LOG.warn("Wrong navElement: " + navElement + "; original = " + docOwner + " of class " + docOwner.getClass());
       return null;
     }
     PsiDocComment comment = ((PsiJavaDocumentedElement) navElement).getDocComment();

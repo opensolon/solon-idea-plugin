@@ -1,5 +1,6 @@
 package org.noear.solon.idea.plugin.metadata.source;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
@@ -19,24 +20,28 @@ import java.util.Map;
 import java.util.Objects;
 
 public class MetadataFileIndex extends ScalarIndexExtension<String> {
-  public static final String META_FILE_DIR = "META-INF/solon";
+
+  private static final Logger log = Logger.getInstance(MetadataFileIndex.class);
+
+  public static final String META_FILE_DIR = "META-INF";
+  public static final String SOLON_FILE_DIR = "solon";
   public static final String METADATA_FILE_NAME = "solon-configuration-metadata.json";
-  public static final String METADATA_FILE = META_FILE_DIR + "/" + METADATA_FILE_NAME;
+  public static final String METADATA_FILE = META_FILE_DIR + "/" + SOLON_FILE_DIR + "/" + METADATA_FILE_NAME;
+
   public static final String ADDITIONAL_METADATA_FILE_NAME = "additional-solon-configuration-metadata.json";
-  public static final String ADDITIONAL_METADATA_FILE = META_FILE_DIR + "/" + ADDITIONAL_METADATA_FILE_NAME;
-  public static final String PLUGIN_INDEX_NAMESPACE = "org.noear.solon.idea.plugin.";
-  public static final ID<String, Void> NAME = ID.create(
-      PLUGIN_INDEX_NAMESPACE + MetadataFileIndex.class.getSimpleName());
+  public static final String ADDITIONAL_METADATA_FILE = META_FILE_DIR + "/" + SOLON_FILE_DIR + "/" + ADDITIONAL_METADATA_FILE_NAME;
+  public static final ID<String, Void> NAME = ID.create(MetadataFileIndex.class.getCanonicalName());
 
   private static final String UNIQUE_KEY = "META";
 
 
   @NotNull
   public static Collection<VirtualFile> getFiles(@NotNull GlobalSearchScope scope) {
-    return FileBasedIndex.getInstance().getContainingFiles(NAME, UNIQUE_KEY, scope)
-        .stream()
-        .filter(vf -> isMetaFile(vf, Objects.requireNonNull(scope.getProject())))
-        .toList();
+    Collection<VirtualFile> files = FileBasedIndex.getInstance().getContainingFiles(NAME, UNIQUE_KEY, scope);
+    Collection<VirtualFile> filteredFiles = files.stream()
+            .filter(vf -> isMetaFile(vf, Objects.requireNonNull(scope.getProject())))
+            .toList();
+    return filteredFiles;
   }
 
 
@@ -46,18 +51,21 @@ public class MetadataFileIndex extends ScalarIndexExtension<String> {
       return false;
     }
     VirtualFile parent = file.getParent();
-    if (parent == null || !parent.getName().equals(META_FILE_DIR)) {
+    if (parent == null || !parent.getName().equals(SOLON_FILE_DIR)) {
       return false;
     }
-    // If the 'spring-configuration-metadata.json' is generated, 'additional-spring-configuration-metadata.json' will
-    // be merged into it. But 'additional-spring-configuration-metadata.json' should be load in case of the
-    // 'spring-configuration-metadata.json' is not generated, i.e., there is no `@ConfigurationProperties` annotated class.
+    // If the 'solon-configuration-metadata.json' is generated, 'additional-solon-configuration-metadata.json' will
+    // be merged into it. But 'additional-solon-configuration-metadata.json' should be load in case of the
+    // 'solon-configuration-metadata.json' is not generated, i.e., there is no `@ConfigurationProperties` annotated class.
     return !name.equals(ADDITIONAL_METADATA_FILE_NAME) || parent.findChild(METADATA_FILE_NAME) == null;
   }
 
 
   public static boolean isMetaFile(@NotNull VirtualFile file, @NotNull Project project) {
-    if (!file.isValid()) return false;
+    VirtualFile canonicalFile = file.getCanonicalFile();
+    if (!file.isValid()) {
+      return false;
+    }
     String name = file.getName();
     if (!name.equals(METADATA_FILE_NAME) && !name.equals(ADDITIONAL_METADATA_FILE_NAME)) {
       return false;
@@ -65,7 +73,9 @@ public class MetadataFileIndex extends ScalarIndexExtension<String> {
     VirtualFile classRoot;
     if (file.isInLocalFileSystem()) {
       @Nullable Module module = ProjectFileIndex.getInstance(project).getModuleForFile(file, false);
-      if (module == null) return false;
+      if (module == null) {
+        return false;
+      }
       VirtualFile[] classesRoots = ModuleRootUtils.getClassRootsWithoutLibraries(module);
       classRoot = null;
       for (VirtualFile root : classesRoots) {
@@ -74,7 +84,9 @@ public class MetadataFileIndex extends ScalarIndexExtension<String> {
           break;
         }
       }
-      if (classRoot == null) return false;
+      if (classRoot == null) {
+        return false;
+      }
     } else {
       classRoot = VfsUtilCore.getRootFile(file);
     }

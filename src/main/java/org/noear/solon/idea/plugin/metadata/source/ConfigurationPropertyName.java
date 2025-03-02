@@ -1176,7 +1176,7 @@ public class ConfigurationPropertyName implements Comparable<ConfigurationProper
 
 
     private static boolean isAlpha(char ch) {
-      return ch >= 'a' && ch <= 'z';
+      return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
     }
 
 

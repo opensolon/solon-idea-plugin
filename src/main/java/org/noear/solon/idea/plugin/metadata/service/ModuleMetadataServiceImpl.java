@@ -39,6 +39,10 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
     refreshMetadata();
   }
 
+  @Override
+  public void refreshAfterIndexing() {
+    this.refreshMetadata();
+  }
 
   @Override
   public @NotNull MetadataIndex getIndex() {
@@ -76,8 +80,8 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
     // we only accept new metafiles from the index (but won't remove files even if the index doesn't contain it),
     // the removal of the non-exists ones is done by AggregatedMetadataIndex#refresh()
     files.removeIf(vf -> currentFiles.contains(vf.getUrl()));
-    LOG.info("Module \"" + this.module.getName() + "\"'s metadata needs refresh");
-    LOG.info("New metadata files: " + files);
+    LOG.warn("Module \"" + this.module.getName() + "\"'s metadata needs refresh");
+    LOG.warn("New metadata files: " + files);
     ProjectMetadataService pms = project.getService(ProjectMetadataService.class);
     AggregatedMetadataIndex meta = this.index instanceof AggregatedMetadataIndex
         ? (AggregatedMetadataIndex) this.index
