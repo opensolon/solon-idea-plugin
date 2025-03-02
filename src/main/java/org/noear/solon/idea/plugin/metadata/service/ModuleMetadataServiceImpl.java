@@ -40,15 +40,9 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
   }
 
   @Override
-  public void refreshAfterIndexing() {
-    this.refreshMetadata();
-  }
-
-  @Override
   public @NotNull MetadataIndex getIndex() {
     return index;
   }
-
 
   synchronized void refreshMetadata() {
     refreshMetadata(Collections.emptySet());
@@ -56,6 +50,7 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
 
 
   synchronized void refreshMetadata(Collection<VirtualFile> unIndexedMetaFiles) {
+    System.out.println("refreshMetadata start");
     LOG.trace("Try refreshing metadata for module " + this.module.getName());
     @NotNull GlobalSearchScope scope = new ModuleScope(this.module);
     Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
@@ -74,6 +69,7 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
         .collect(Collectors.toSet());
     if (currentFiles.containsAll(files.stream().map(VirtualFile::getUrl).collect(Collectors.toSet()))) {
       // No new metadata files, can stop here.
+      System.out.println("refreshMetadata end");
       return;
     }
     // Because the MetadataFileIndex may lag of the creation of new metafiles,
@@ -92,6 +88,7 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
     if (!meta.isEmpty()) {
       this.index = meta;
     }
+    System.out.println("refreshMetadata with new index end");
   }
 
 

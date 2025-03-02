@@ -23,7 +23,6 @@
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
-
         <indexedRootsProvider
                 implementation="org.noear.solon.idea.plugin.metadata.source.MetadataFileIndexConfigurator"/>
         <fileBasedIndex
@@ -72,6 +71,8 @@
         <moduleService
                 serviceInterface="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService"
                 serviceImplementation="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataServiceImpl"/>
+
+        <postStartupActivity implementation="org.noear.solon.idea.plugin.metadata.service.MetadataStartupActivity"/>
     </extensions>
 
     <applicationListeners>

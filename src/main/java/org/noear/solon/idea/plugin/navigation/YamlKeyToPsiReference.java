@@ -35,7 +35,6 @@ public class YamlKeyToPsiReference extends PsiReferenceBase<PsiElement> {
     }
 
     ModuleMetadataService metadataService = module.getService(ModuleMetadataService.class);
-    metadataService.refreshAfterIndexing();
     MetadataIndex metadata = metadataService.getIndex();
     String fullName = YAMLUtil.getConfigFullName(yamlKeyValue);
 

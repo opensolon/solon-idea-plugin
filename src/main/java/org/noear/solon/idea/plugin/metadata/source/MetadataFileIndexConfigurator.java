@@ -27,6 +27,7 @@ public class MetadataFileIndexConfigurator extends IndexableSetContributor {
 
   @Override
   public @NotNull Set<VirtualFile> getAdditionalProjectRootsToIndex(@NotNull Project project) {
+    System.out.println("getAdditionalProjectRootsToIndex start");
     Set<VirtualFile> files = new HashSet<>();
     for (Module module : ModuleManager.getInstance(project).getModules()) {
       for (VirtualFile classRoot : ModuleRootUtils.getClassRootsWithoutLibraries(module)) {
@@ -48,6 +49,7 @@ public class MetadataFileIndexConfigurator extends IndexableSetContributor {
         }
       }
     }
+    System.out.println("getAdditionalProjectRootsToIndex end");
     return files;
   }
 }

@@ -18,7 +18,6 @@ public class YamlReferenceContributor extends PsiReferenceContributor {
 
   @Override
   public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
-    System.err.println("registerReferenceProviders");
     PsiElementPattern.Capture<YAMLKeyValue> pattern =
         psiElement(YAMLKeyValue.class)
             .withLanguage(YAMLLanguage.INSTANCE)

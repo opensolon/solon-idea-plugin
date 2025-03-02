@@ -62,7 +62,6 @@ public class MetadataFileIndex extends ScalarIndexExtension<String> {
 
 
   public static boolean isMetaFile(@NotNull VirtualFile file, @NotNull Project project) {
-    VirtualFile canonicalFile = file.getCanonicalFile();
     if (!file.isValid()) {
       return false;
     }
