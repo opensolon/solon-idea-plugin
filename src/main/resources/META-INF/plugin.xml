@@ -28,10 +28,6 @@
         <fileBasedIndex
                 implementation="org.noear.solon.idea.plugin.metadata.source.MetadataFileIndex"/>
 
-        <projectService
-                serviceInterface="org.noear.solon.idea.plugin.suggestion.service.SuggestionService"
-                serviceImplementation="org.noear.solon.idea.plugin.suggestion.service.SuggestionServiceImpl"/>
-
         <fileType name="solon-properties-file"
                   implementationClass="org.noear.solon.idea.plugin.filetype.SolonPropertiesFileType"
                   fieldName="INSTANCE"
@@ -59,21 +55,15 @@
 
         <completion.contributor
                 language="Properties"
-                implementationClass="org.noear.solon.idea.plugin.suggestion.completion.PropertiesCompletionContributor"/>
+                implementationClass="org.noear.solon.idea.plugin.completion.properties.SpringPropertiesCompletionContributor"/>
 
         <completion.contributor
                 language="yaml"
-                implementationClass="org.noear.solon.idea.plugin.suggestion.completion.YamlCompletionContributor"/>
+                implementationClass="org.noear.solon.idea.plugin.completion.yaml.SpringYamlCompletionContributor"/>
 
         <moduleBuilder
                 builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"
                 order="last"/>
-
-        <postStartupActivity implementation="org.noear.solon.idea.plugin.suggestion.event.SuggestionIndexEvent"/>
-
-
-        <implicitUsageProvider
-                implementation="org.noear.solon.idea.plugin.suggestion.service.UsageProviderServiceImpl"/>
 
         <moduleService
                 serviceInterface="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService"
@@ -81,12 +71,4 @@
 
         <postStartupActivity implementation="org.noear.solon.idea.plugin.metadata.service.MetadataStartupActivity"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="org.noear.solon.idea.plugin.suggestion.event.SuggestionReIndexEvent"
-                  topic="com.intellij.openapi.compiler.CompilationStatusListener"/>
-
-        <listener class="org.noear.solon.idea.plugin.suggestion.completion.YamlCompletionProvider"
-                  topic="com.intellij.openapi.fileEditor.FileOpenedSyncListener"/>
-    </applicationListeners>
 </idea-plugin>
