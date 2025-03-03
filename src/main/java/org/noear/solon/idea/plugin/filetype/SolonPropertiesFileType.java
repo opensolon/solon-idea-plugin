@@ -1,6 +1,5 @@
-package org.noear.solon.idea.plugin.suggestion.filetype;
+package org.noear.solon.idea.plugin.filetype;
 
-import com.intellij.lang.Language;
 import com.intellij.lang.properties.PropertiesLanguage;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.NlsContexts;
@@ -8,7 +7,6 @@ import com.intellij.openapi.util.NlsSafe;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.yaml.YAMLLanguage;
 import org.noear.solon.idea.plugin.SolonIcons;
 
 import javax.swing.*;

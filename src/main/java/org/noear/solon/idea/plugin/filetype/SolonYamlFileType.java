@@ -1,4 +1,4 @@
-package org.noear.solon.idea.plugin.suggestion.filetype;
+package org.noear.solon.idea.plugin.filetype;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.NlsContexts;
@@ -16,7 +16,7 @@ public class SolonYamlFileType extends LanguageFileType {
     public static final SolonYamlFileType INSTANCE = new SolonYamlFileType();
 
     private SolonYamlFileType() {
-        super(YAMLLanguage.INSTANCE,true);
+        super(YAMLLanguage.INSTANCE, true);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class SolonYamlFileType extends LanguageFileType {
     }
 
     @Override
-    public @Nullable Icon getIcon(){
+    public @Nullable Icon getIcon() {
         return SolonIcons.SolonIcon_16x16;
     }
 }

@@ -33,13 +33,14 @@
                 serviceImplementation="org.noear.solon.idea.plugin.suggestion.service.SuggestionServiceImpl"/>
 
         <fileType name="solon-properties-file"
-                  implementationClass="org.noear.solon.idea.plugin.suggestion.filetype.SolonPropertiesFileType"
+                  implementationClass="org.noear.solon.idea.plugin.filetype.SolonPropertiesFileType"
                   fieldName="INSTANCE"
                   fileNames="app.properties"
+                  extensions="properties"
                   patterns="app-*.properties"/>
 
         <fileType name="solon-yaml-file"
-                  implementationClass="org.noear.solon.idea.plugin.suggestion.filetype.SolonYamlFileType"
+                  implementationClass="org.noear.solon.idea.plugin.filetype.SolonYamlFileType"
                   fieldName="INSTANCE"
                   fileNames="app.yaml;app.yml"
                   extensions="yaml,yml"
@@ -47,9 +48,14 @@
 
         <psi.referenceContributor
                 language="yaml"
-                implementation="org.noear.solon.idea.plugin.navigation.YamlReferenceContributor"/>
+                implementation="org.noear.solon.idea.plugin.navigation.forward.YamlToCodeReferenceContributor"/>
+
+        <psi.referenceContributor
+                language="Properties"
+                implementation="org.noear.solon.idea.plugin.navigation.forward.PropertiesToCodeReferenceContributor"/>
+
         <referencesSearch
-                implementation="org.noear.solon.idea.plugin.navigation.PsiToYamlKeySearcher"/>
+                implementation="org.noear.solon.idea.plugin.navigation.backward.PsiToSpringPropertyReferenceSearcher"/>
 
         <completion.contributor
                 language="Properties"
@@ -66,7 +72,8 @@
         <postStartupActivity implementation="org.noear.solon.idea.plugin.suggestion.event.SuggestionIndexEvent"/>
 
 
-        <implicitUsageProvider implementation="org.noear.solon.idea.plugin.suggestion.service.UsageProviderServiceImpl"/>
+        <implicitUsageProvider
+                implementation="org.noear.solon.idea.plugin.suggestion.service.UsageProviderServiceImpl"/>
 
         <moduleService
                 serviceInterface="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService"

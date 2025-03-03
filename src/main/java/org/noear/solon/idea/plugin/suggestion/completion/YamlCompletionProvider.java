@@ -24,7 +24,7 @@ import org.jetbrains.yaml.psi.impl.YAMLBlockMappingImpl;
 import org.jetbrains.yaml.psi.impl.YAMLPlainTextImpl;
 import org.noear.solon.idea.plugin.common.util.GenericUtil;
 import org.noear.solon.idea.plugin.common.util.LoggerUtil;
-import org.noear.solon.idea.plugin.suggestion.filetype.SolonYamlFileType;
+import org.noear.solon.idea.plugin.filetype.SolonYamlFileType;
 import org.noear.solon.idea.plugin.suggestion.service.SuggestionService;
 import org.yaml.snakeyaml.Yaml;
 
@@ -139,7 +139,6 @@ public class YamlCompletionProvider extends CompletionProvider<CompletionParamet
         }
         return (T) element;
     }
-
 
 
 }
