@@ -26,13 +26,6 @@ import org.noear.solon.idea.plugin.initializr.metadata.json.SolonMetadataOptionI
 import org.noear.solon.idea.plugin.initializr.util.StringUtils;
 
 import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -210,7 +203,7 @@ public class ProjectDetails {
             ComboBox_Packaging.setSelectedItem(metadata.getInitMetadata().getPackaging().getByValue(metadata.getInitMetadata().getPackaging().getDefaultValue()));
         }
 
-        TextField_Location.addActionListener(new ComponentWithBrowseButton.BrowseFolderActionListener(null, null, TextField_Location, context.getProject(), FileChooserDescriptorFactory.createSingleFolderDescriptor(), new TextComponentAccessor<JTextField>() {
+        TextField_Location.addActionListener(new ComponentWithBrowseButton.BrowseFolderActionListener(TextField_Location, context.getProject(), FileChooserDescriptorFactory.createSingleFolderDescriptor(), new TextComponentAccessor<JTextField>() {
             @Override
             public @NlsSafe String getText(JTextField jTextField) {
                 return jTextField.getText();

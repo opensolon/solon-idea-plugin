@@ -12,6 +12,7 @@ plugins {
     id("org.jetbrains.intellij") version "1.15.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.0.0"
+    id("io.freefair.lombok") version "8.10"
 }
 
 group = properties("pluginGroup")
@@ -27,6 +28,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
     implementation("org.apache.commons:commons-collections4:4.4")
     implementation("org.yaml:snakeyaml:2.0")
+    implementation("commons-beanutils:commons-beanutils:1.9.4")
+    implementation("jakarta.validation:jakarta.validation-api:3.1.0")
 }
 
 // Set the JVM language level used to build the project. Use Java 11 for 2020.3+, and Java 17 for 2022.2+.
