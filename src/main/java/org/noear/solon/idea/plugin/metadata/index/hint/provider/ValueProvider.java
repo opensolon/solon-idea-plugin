@@ -10,9 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 /**
- * Spring configuration metadata hint, value providers.
- *
- * @see <a href="https://docs.spring.io/spring-boot/specification/configuration-metadata/manual-hints.html">Spring docs</a>
+ * Solon configuration metadata hint, value providers.
  */
 public interface ValueProvider {
   static ValueProvider create(ConfigurationMetadata.Hint.ValueProvider metadata) {

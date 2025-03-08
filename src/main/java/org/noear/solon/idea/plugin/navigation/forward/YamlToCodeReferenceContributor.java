@@ -12,10 +12,6 @@ import org.noear.solon.idea.plugin.filetype.SolonYamlFileType;
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 import static com.intellij.patterns.PsiJavaPatterns.virtualFile;
 
-
-/**
- * Provides references from Spring configuration file (application.yaml) to code.
- */
 public class YamlToCodeReferenceContributor extends PsiReferenceContributor {
 
 //TODO refactor by com.intellij.psi.search.searches.DefinitionsScopedSearch.EP and

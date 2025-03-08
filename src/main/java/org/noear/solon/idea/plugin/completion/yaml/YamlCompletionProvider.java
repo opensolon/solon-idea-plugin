@@ -38,7 +38,7 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
         }
         Project project = element.getProject();
         if (ReadAction.compute(() -> DumbService.isDumb(project))) {
-            DumbService.getInstance(project).showDumbModeNotificationForFunctionality("Spring configuration completion",
+            DumbService.getInstance(project).showDumbModeNotificationForFunctionality("Solon configuration completion",
                     DumbModeBlockedFunctionality.CodeCompletion);
             return;
         }

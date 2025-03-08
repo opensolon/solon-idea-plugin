@@ -11,9 +11,9 @@ import com.intellij.util.Processor;
 import org.jetbrains.annotations.NotNull;
 import org.noear.solon.idea.plugin.navigation.ReferenceService;
 
-public class PsiToSpringPropertyReferenceSearcher
+public class PsiToSolonPropertyReferenceSearcher
         extends QueryExecutorBase<PsiReference, ReferencesSearch.SearchParameters> {
-    protected PsiToSpringPropertyReferenceSearcher() {
+    protected PsiToSolonPropertyReferenceSearcher() {
         super(true);
     }
 

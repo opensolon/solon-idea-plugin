@@ -70,7 +70,7 @@ class MetadataGroupImpl implements MetadataGroup {
       }
       HtmlBuilder doc = new HtmlBuilder();
       String desc = metadata.getDescription();
-      //Unfortunately, even though there is a 'description' field for the group metadata, `spring boot configuration processor` will never fill it.
+
       //Here we use group class/method's document instead.
       String descFrom = null;
       if (StringUtils.isBlank(desc)) {

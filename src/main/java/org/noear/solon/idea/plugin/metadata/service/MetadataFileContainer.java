@@ -50,7 +50,7 @@ class MetadataFileContainer implements MutableReference<MetadataIndex> {
     try {
       AggregatedMetadataIndex index = new AggregatedMetadataIndex(
           new ConfigurationMetadataIndex(this.source, this.project));
-      // Spring does not create metadata for types in collections, we should create it by ourselves and expand our index,
+      // Solon does not create metadata for types in collections, we should create it by ourselves and expand our index,
       // to better support code-completion, documentation, navigation, etc.
       for (MetadataProperty property : index.getProperties().values()) {
         resolvePropertyType(property).ifPresent(index::addFirst);

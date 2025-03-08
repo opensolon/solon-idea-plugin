@@ -65,12 +65,7 @@ public class InitializerDownloader {
         RefreshQueue.getInstance().refresh(false, true, null, targetFile);
     }
 
-    /**
-     * Debug logging can be enabled by adding fully classified class name/package name with # prefix
-     * For eg., to enable debug logging, go `Help > Debug log settings` & type `#in.oneton.idea.spring.assistant
-     *
-     * @param doWhenDebug code to execute when debug is enabled
-     */
+
     private void debug(Runnable doWhenDebug) {
         if (log.isDebugEnabled()) {
             doWhenDebug.run();

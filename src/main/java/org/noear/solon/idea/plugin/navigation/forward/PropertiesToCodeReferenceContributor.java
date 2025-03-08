@@ -14,7 +14,7 @@ import static com.intellij.patterns.PsiJavaPatterns.virtualFile;
 
 
 /**
- * Provides references from Spring configuration file (application.properties) to code.
+ * Provides references from Solon configuration file (application.properties) to code.
  */
 public class PropertiesToCodeReferenceContributor extends PsiReferenceContributor {
 

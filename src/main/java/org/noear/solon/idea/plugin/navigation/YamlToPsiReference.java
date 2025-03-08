@@ -9,7 +9,7 @@ import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 
 import java.util.Iterator;
 
-class YamlToPsiReference extends SpringPropertyToPsiReference<YAMLKeyValue> {
+class YamlToPsiReference extends SolonPropertyToPsiReference<YAMLKeyValue> {
     YamlToPsiReference(@NotNull YAMLKeyValue source) {
         super(source);
     }

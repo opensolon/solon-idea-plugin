@@ -19,7 +19,7 @@ import static com.intellij.openapi.compiler.CompilerTopics.COMPILATION_STATUS;
 /**
  * Service that generates {@link MetadataIndex} from one {@linkplain ModuleRootModel#getSourceRoots() SourceRoot}.
  * <p>
- * It searches and generate index from Spring Configuration Files
+ * It searches and generate index from Solon Configuration Files
  * in the source root and watches them for automatically update the index.
  */
 @Service(Service.Level.PROJECT)

@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Add project's {@code <module-output-dir>/META-INF/(additional-)spring-configuration-metadata.json} files into file-based index, for {@link MetadataFileIndex}.
+ * Add project's {@code <module-output-dir>/META-INF/(additional-)solon-configuration-metadata.json} files into file-based index, for {@link MetadataFileIndex}.
  */
 public class MetadataFileIndexConfigurator extends IndexableSetContributor {
 

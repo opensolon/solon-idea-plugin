@@ -11,9 +11,6 @@ public interface ModuleMetadataService {
     return module.getService(ModuleMetadataService.class);
   }
 
-  /**
-   * @return Merged spring configuration metadata in this module and its libraries, or {@linkplain MetadataIndex#empty(Project) EMPTY}.
-   */
   @NotNull MetadataIndex getIndex();
 
 }

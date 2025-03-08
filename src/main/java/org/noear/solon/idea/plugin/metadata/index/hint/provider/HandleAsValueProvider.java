@@ -99,9 +99,7 @@ public class HandleAsValueProvider extends AbstractValueProvider {
       PrefixMatcher matcher = Objects.requireNonNullElse(prefixMatcher, PrefixMatcher.ALWAYS_TRUE);
       // Standard charsets is the first priority
       STANDARD_CHARSETS.stream().filter(h -> matcher.prefixMatches(h.value())).forEach(result::add);
-      // Try non-standard charsets, but it maybe not suitable for user
-      // Because this is from the IDE's charset, not the user's spring application
-      // Try Charsets that is IANA registered first, then all the others
+
       Charset.availableCharsets().values().stream()
           .filter(cs -> matcher.prefixMatches(cs.name()))
           .filter(Charset::isRegistered)
@@ -121,10 +119,8 @@ public class HandleAsValueProvider extends AbstractValueProvider {
     @Override
     public Collection<Hint> handle(
         @NotNull CompletionParameters completionParameters, @Nullable PrefixMatcher prefixMatcher) {
-      // The return value must be convertible by {@link org.springframework.core.convert.support.StringToLocaleConverter}
+
       PrefixMatcher matcher = Objects.requireNonNullElse(prefixMatcher, PrefixMatcher.ALWAYS_TRUE);
-      // But this is the locals that installed on the developer's computer,
-      // may not suitable for he/she's application. Consider using all the ISO standard locale names?
 
       return Arrays.stream(Locale.getAvailableLocales())
           .map(Locale::stripExtensions)
@@ -191,10 +187,7 @@ public class HandleAsValueProvider extends AbstractValueProvider {
   }
 
 
-  /**
-   * @see org.springframework.core.io.ResourceLoader#getResource(String)
-   * @see org.springframework.core.io.support.ResourcePatternResolver
-   */
+
   private static class ResourceHandler implements Handler {
     @Override
     public Collection<Hint> handle(

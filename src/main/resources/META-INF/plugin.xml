@@ -51,15 +51,15 @@
                 implementation="org.noear.solon.idea.plugin.navigation.forward.PropertiesToCodeReferenceContributor"/>
 
         <referencesSearch
-                implementation="org.noear.solon.idea.plugin.navigation.backward.PsiToSpringPropertyReferenceSearcher"/>
+                implementation="org.noear.solon.idea.plugin.navigation.backward.PsiToSolonPropertyReferenceSearcher"/>
 
         <completion.contributor
                 language="Properties"
-                implementationClass="org.noear.solon.idea.plugin.completion.properties.SpringPropertiesCompletionContributor"/>
+                implementationClass="org.noear.solon.idea.plugin.completion.properties.SolonPropertiesCompletionContributor"/>
 
         <completion.contributor
                 language="yaml"
-                implementationClass="org.noear.solon.idea.plugin.completion.yaml.SpringYamlCompletionContributor"/>
+                implementationClass="org.noear.solon.idea.plugin.completion.yaml.SolonYamlCompletionContributor"/>
 
         <moduleBuilder
                 builderClass="org.noear.solon.idea.plugin.initializr.SolonInitializrBuilder"

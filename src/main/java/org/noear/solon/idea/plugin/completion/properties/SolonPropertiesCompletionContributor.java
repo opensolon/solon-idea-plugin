@@ -8,8 +8,8 @@ import org.noear.solon.idea.plugin.filetype.SolonPropertiesFileType;
 
 import static com.intellij.patterns.PlatformPatterns.virtualFile;
 
-public class SpringPropertiesCompletionContributor extends CompletionContributor {
-    public SpringPropertiesCompletionContributor() {
+public class SolonPropertiesCompletionContributor extends CompletionContributor {
+    public SolonPropertiesCompletionContributor() {
         extend(
                 CompletionType.BASIC,
                 PlatformPatterns.psiElement().withLanguage(PropertiesLanguage.INSTANCE)

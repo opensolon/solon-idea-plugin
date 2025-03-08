@@ -56,13 +56,6 @@ public final class CompletionService {
         }
     }
 
-    /**
-     * Retrieve candidates for configuration key completion.
-     *
-     * @param parentName  The context property name for querying, must be existed, such as 'spring.security', can be null or empty
-     * @param queryString The user input for completion.
-     * @return true if some suggestions have been added to the resultSet.
-     */
     public boolean findSuggestionForKey(
             @NotNull CompletionParameters completionParameters, @NotNull CompletionResultSet resultSet,
             @Nullable String parentName, String queryString, InsertHandler<LookupElement> insertHandler

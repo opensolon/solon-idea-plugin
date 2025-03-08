@@ -35,7 +35,7 @@ public class PsiTypeUtils {
   @Nullable
   public static PsiType createTypeFromText(Project project, String type) {
     PsiJavaParserFacade parser = JavaPsiFacade.getInstance(project).getParserFacade();
-    // When reference an inner class, we should use A.B not A$B but spring does.
+
     String typeString = type.replace('$', '.');
     return ReadAction.compute(() -> {
       PsiType t = parser.createTypeFromText(typeString, null);
@@ -68,7 +68,7 @@ public class PsiTypeUtils {
    */
   public static boolean isValueType(@Nullable PsiType type) {
     if (type == null) return false;
-    // From Spring 'org.springframework.boot.convert.ApplicationConversionService'
+
     return ReadAction.compute(() -> isPhysical(type)
         && (TypeConversionUtil.isAssignableFromPrimitiveWrapper(type)
                 || TypeConversionUtil.isPrimitiveAndNotNullOrWrapper(type)

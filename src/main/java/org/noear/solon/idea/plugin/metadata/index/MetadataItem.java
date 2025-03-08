@@ -9,9 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.util.Optional;
 
-/**
- * A spring configuration metadata property or group
- */
 public interface MetadataItem {
   /**
    * @see ConfigurationMetadata.Property#getName()

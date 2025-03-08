@@ -39,7 +39,7 @@ public class LoggerNameValueProvider extends AbstractValueProvider {
       @NotNull CompletionParameters completionParameters, @Nullable PrefixMatcher prefixMatcher
   ) {
     @NotNull PrefixMatcher matcher = getPrefixMatcher(prefixMatcher);
-    // According to Spring's doc: "Typically, package and class names available in the current project can be auto-completed."
+    // According to Solon's doc: "Typically, package and class names available in the current project can be auto-completed."
     Project project = getProject(completionParameters);
     DumbService dumbService = DumbService.getInstance(project);
     if (dumbService.isDumb()) {
@@ -77,7 +77,7 @@ public class LoggerNameValueProvider extends AbstractValueProvider {
 //      });
 //    });
     if (this.group) {
-      // Spring predefined logger groups is in the value hint, we don't need add them here.
+      // Solon predefined logger groups is in the value hint, we don't need add them here.
       // TODO Create an index for user-defined logger groups from yaml/properties configurations.
       // find logger groups in this yaml document, I know it is not good enough,
       // but this is easy to carry out and suitable for most of the use cases.

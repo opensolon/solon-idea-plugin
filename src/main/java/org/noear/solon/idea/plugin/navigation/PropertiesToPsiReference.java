@@ -8,7 +8,7 @@ import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 
 import java.util.Iterator;
 
-class PropertiesToPsiReference extends SpringPropertyToPsiReference<PropertyKeyImpl> {
+class PropertiesToPsiReference extends SolonPropertyToPsiReference<PropertyKeyImpl> {
     PropertiesToPsiReference(@NotNull PropertyKeyImpl source) {
         super(source);
     }

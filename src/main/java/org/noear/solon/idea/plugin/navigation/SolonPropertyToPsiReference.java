@@ -13,10 +13,10 @@ import org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService;
 
 import java.util.Iterator;
 
-abstract class SpringPropertyToPsiReference<T extends PsiElement>
+abstract class SolonPropertyToPsiReference<T extends PsiElement>
         extends PsiReferenceBase<T> implements PsiMemberReference {
 
-    SpringPropertyToPsiReference(@NotNull T source) {
+    SolonPropertyToPsiReference(@NotNull T source) {
         super(source, true);
     }
 

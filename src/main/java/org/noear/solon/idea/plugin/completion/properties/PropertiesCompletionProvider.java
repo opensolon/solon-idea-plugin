@@ -34,7 +34,7 @@ class PropertiesCompletionProvider extends CompletionProvider<CompletionParamete
         Project project = element.getProject();
         if (ReadAction.compute(() -> DumbService.isDumb(project))) {
             DumbService.getInstance(project).showDumbModeNotificationForFunctionality(
-                    "Spring configuration completion", DumbModeBlockedFunctionality.CodeCompletion);
+                    "Solon configuration completion", DumbModeBlockedFunctionality.CodeCompletion);
             return;
         }
         Module module = findModuleForPsiElement(element);

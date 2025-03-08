@@ -8,9 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-/**
- * A spring configuration metadata property
- */
 public interface MetadataProperty extends MetadataItem {
   /**
    * The PsiType include type arguments, for example, {@code Map<String, String>}.

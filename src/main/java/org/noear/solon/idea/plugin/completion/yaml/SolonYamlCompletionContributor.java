@@ -8,8 +8,8 @@ import org.noear.solon.idea.plugin.filetype.SolonYamlFileType;
 
 import static com.intellij.patterns.PlatformPatterns.virtualFile;
 
-public class SpringYamlCompletionContributor extends CompletionContributor {
-    public SpringYamlCompletionContributor() {
+public class SolonYamlCompletionContributor extends CompletionContributor {
+    public SolonYamlCompletionContributor() {
         extend(
                 CompletionType.BASIC,
                 PlatformPatterns.psiElement().withLanguage(YAMLLanguage.INSTANCE)

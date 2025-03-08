@@ -21,32 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * A configuration property name composed of elements separated by dots. User created
- * names may contain the characters "{@code a-z}" "{@code 0-9}") and "{@code -}", they
- * must be lower-case and must start with an alphanumeric character. The "{@code -}" is
- * used purely for formatting, i.e. "{@code foo-bar}" and "{@code foobar}" are considered
- * equivalent.
- * <p>
- * The "{@code [}" and "{@code ]}" characters may be used to indicate an associative
- * index(i.e. a {@link Map} key or a {@link Collection} index). Indexes names are not
- * restricted and are considered case-sensitive.
- * <p>
- * Here are some typical examples:
- * <ul>
- * <li>{@code spring.main.banner-mode}</li>
- * <li>{@code server.hosts[0].name}</li>
- * <li>{@code log[org.springboot].level}</li>
- * </ul>
- *
- * <b>Most of this file is copied from org.springframework.boot.context.properties.source.ConfigurationPropertyName</b>
- *
- * @author Phillip Webb
- * @author Madhura Bhave
- * @see #of(CharSequence)
- * @see ConfigurationPropertySource
- * @since 2.0.0
- */
 public class ConfigurationPropertyName implements Comparable<ConfigurationPropertyName> {
 
   /**
