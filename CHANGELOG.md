@@ -2,6 +2,14 @@
 
 # Solon Changelog
 
+## [0.1.0]
+
+### Updated
+
+- Only support IDEA 243.* version
+- Support configuration data hints and property navigation for yml and properties files
+
+
 ## [0.0.13]
 
 ### Updated
