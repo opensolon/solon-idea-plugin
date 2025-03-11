@@ -116,14 +116,24 @@ public final class ReferenceService {
         Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(
                 () -> FileTypeIndex.getFiles(SolonYamlFileType.INSTANCE,
                         GlobalSearchScope.projectScope(project)));
-        return this.yamlIndexHolder.getIndex(files);
+
+        try {
+            return this.yamlIndexHolder.getIndex(files);
+        } catch (Throwable ex) {
+            return new HashSetValuedHashMap<>();
+        }
     }
 
     private MultiValuedMap<String, PsiReference> refreshPropertiesIndex() {
         Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(
                 () -> FileTypeIndex.getFiles(SolonPropertiesFileType.INSTANCE,
                         GlobalSearchScope.projectScope(project)));
-        return this.propertiesIndexHolder.getIndex(files);
+
+        try {
+            return this.propertiesIndexHolder.getIndex(files);
+        } catch (Throwable ex) {
+            return new HashSetValuedHashMap<>();
+        }
     }
 
     private abstract class AbstractIndexHolder<E extends PsiElement> extends UserDataHolderBase {

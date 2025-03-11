@@ -70,29 +70,37 @@ public class PsiTypeUtils {
     if (type == null) return false;
 
     return ReadAction.compute(() -> isPhysical(type)
-        && (TypeConversionUtil.isAssignableFromPrimitiveWrapper(type)
-                || TypeConversionUtil.isPrimitiveAndNotNullOrWrapper(type)
-                || TypeConversionUtil.isEnumType(type)
-                || isClassNameEquals(type, CommonClassNames.JAVA_LANG_STRING)
-                || isClassNameEquals(type, CommonClassNames.JAVA_LANG_CLASS)
-                || isClassNameEquals(type, CommonClassNames.JAVA_NIO_CHARSET_CHARSET)
-                || isClassNameEquals(type, "java.util.Locale")
-                || isClassNameEquals(type, "java.nio.charset.Charset")
-                || isClassNameEquals(type, "java.util.Currency")
-                || isClassNameEquals(type, "java.util.UUID")
-                || isClassNameEquals(type, "java.util.regex.Pattern")
-                || isClassNameEquals(type, "kotlin.text.Regex")
-                || isClassNameEquals(type, "java.util.TimeZone")
-                || isClassNameEquals(type, "java.time.ZoneId")
-                || isClassNameEquals(type, "java.time.ZonedDateTime")
-                || isClassNameEquals(type, "java.util.Calendar")
-                || isClassNameEquals(type, "java.time.Duration")
-                || isClassNameEquals(type, "java.time.Period")
-                || isClassNameEquals(type, "java.io.File")
-                || isClassNameEquals(type, CommonClassNames.JAVA_NET_URI)
-                || isClassNameEquals(type, CommonClassNames.JAVA_NET_URL)
-                || isClassNameEquals(type, "java.net.InetAddress")
-                || canConvertFromString(type)));
+        && isValueTypeDo(type));
+  }
+
+  private boolean isValueTypeDo(PsiType type) {
+    try {
+      return TypeConversionUtil.isAssignableFromPrimitiveWrapper(type)
+              || TypeConversionUtil.isPrimitiveAndNotNullOrWrapper(type)
+              || TypeConversionUtil.isEnumType(type)
+              || isClassNameEquals(type, CommonClassNames.JAVA_LANG_STRING)
+              || isClassNameEquals(type, CommonClassNames.JAVA_LANG_CLASS)
+              || isClassNameEquals(type, CommonClassNames.JAVA_NIO_CHARSET_CHARSET)
+              || isClassNameEquals(type, "java.util.Locale")
+              || isClassNameEquals(type, "java.nio.charset.Charset")
+              || isClassNameEquals(type, "java.util.Currency")
+              || isClassNameEquals(type, "java.util.UUID")
+              || isClassNameEquals(type, "java.util.regex.Pattern")
+              || isClassNameEquals(type, "kotlin.text.Regex")
+              || isClassNameEquals(type, "java.util.TimeZone")
+              || isClassNameEquals(type, "java.time.ZoneId")
+              || isClassNameEquals(type, "java.time.ZonedDateTime")
+              || isClassNameEquals(type, "java.util.Calendar")
+              || isClassNameEquals(type, "java.time.Duration")
+              || isClassNameEquals(type, "java.time.Period")
+              || isClassNameEquals(type, "java.io.File")
+              || isClassNameEquals(type, CommonClassNames.JAVA_NET_URI)
+              || isClassNameEquals(type, CommonClassNames.JAVA_NET_URL)
+              || isClassNameEquals(type, "java.net.InetAddress")
+              || canConvertFromString(type);
+    } catch (Throwable ex) {
+      return false;
+    }
   }
 
 
@@ -123,14 +131,26 @@ public class PsiTypeUtils {
     if (type == null) return false;
     if (type instanceof PsiArrayType) return true;
     PsiClassType collectionType = getJavaTypeByName(project, CommonClassNames.JAVA_UTIL_COLLECTION);
-    return ReadAction.compute(() -> collectionType.isAssignableFrom(type));
+    return ReadAction.compute(() -> {
+      try {
+        return collectionType.isAssignableFrom(type);
+      } catch (Throwable ex) {
+        return false;
+      }
+    });
   }
 
 
   public static boolean isMap(Project project, @Nullable PsiType type) {
     if (type == null) return false;
     PsiClassType mapType = getJavaTypeByName(project, CommonClassNames.JAVA_UTIL_MAP);
-    return ReadAction.compute(() -> mapType.isAssignableFrom(type));
+    return ReadAction.compute(() -> {
+      try {
+        return mapType.isAssignableFrom(type);
+      } catch (Throwable ex) {
+        return false;
+      }
+    });
   }
 
 
