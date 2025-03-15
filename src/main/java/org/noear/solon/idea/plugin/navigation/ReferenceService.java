@@ -5,11 +5,13 @@ import com.intellij.lang.properties.psi.Property;
 import com.intellij.lang.properties.psi.impl.PropertyKeyImpl;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.DumbModeBlockedFunctionality;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
@@ -18,6 +20,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.collection.CompositeCollection;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
@@ -42,6 +45,8 @@ import java.util.stream.Collectors;
 
 @Service(Service.Level.PROJECT)
 public final class ReferenceService {
+    private static final Logger LOG = Logger.getInstance(ReferenceService.class);
+
     private final Project project;
     private final YamlIndexHolder yamlIndexHolder = new YamlIndexHolder();
     private final PropertiesIndexHolder propertiesIndexHolder = new PropertiesIndexHolder();
@@ -173,6 +178,10 @@ public final class ReferenceService {
                                     .ifPresent(cn -> index.put(cn, createReference(src)));
                         }
                     });
+                }
+                if (CollectionUtils.isEmpty(files)) {
+                    LOG.warn("No files found for indexing");
+                    return CachedValueProvider.Result.create(index, ModificationTracker.NEVER_CHANGED);
                 }
                 return CachedValueProvider.Result.create(index, files);
             });
