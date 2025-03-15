@@ -2,15 +2,18 @@
 
 # Solon Changelog
 
-## [0.1.0]
+## [0.1.1]
 
 ### Updated
 
-- Only support IDEA 243.* version
-- Support configuration data hints and property navigation for yml and properties files
+- fix issues:
+    - Too many non-blocking read actions submitted at once. Please use coalesceBy, BoundedTaskExecutor or another way of
+      limiting the number of concurrently running threads.: 11 with similar stack traces are currently active
+    - No dependencies provided which causes CachedValue to be never recalculated again. If this is intentional, please
+      use
+      ModificationTracker.NEVER_CHANGED
 
-
-## [0.0.13]
+## [0.1.0]
 
 ### Updated
 
