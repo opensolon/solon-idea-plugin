@@ -42,7 +42,7 @@ class ModuleDependenciesWatcher implements WorkspaceModelChangeListener {
             }
         }
         if (!interested.isEmpty()) {
-            new Task.Backgroundable(project, "Reloading slon configuration metadata") {
+            new Task.Backgroundable(project, "Changed Reloading solon configuration metadata") {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
                     indicator.setIndeterminate(false);
