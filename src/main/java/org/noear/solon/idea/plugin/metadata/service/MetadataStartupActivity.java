@@ -6,6 +6,7 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
+import com.intellij.util.ArrayUtil;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
@@ -18,7 +19,9 @@ public class MetadataStartupActivity implements ProjectActivity {
         // 使用后台线程执行耗时操作
         DumbService.getInstance(project).runWhenSmart(() -> {
             ReadAction.nonBlocking(() -> {
-                        for (Module module : ModuleManager.getInstance(project).getModules()) {
+                        Module[] modules = ModuleManager.getInstance(project).getModules();
+                        if (!ArrayUtil.isEmpty(modules)) {
+                            Module module = modules[0];
                             ModuleMetadataService service = module.getService(ModuleMetadataService.class);
                             if (service instanceof ModuleMetadataServiceImpl impl) {
                                 impl.refreshMetadata();
