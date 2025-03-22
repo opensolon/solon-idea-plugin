@@ -2,6 +2,13 @@
 
 # Solon Changelog
 
+## [0.1.2]
+
+### Updated
+
+- fix issues:
+    - com.intellij.serviceContainer.AlreadyDisposedException: Already disposed: Module: 'xxx' (disposed)
+
 ## [0.1.1]
 
 ### Updated
@@ -10,8 +17,7 @@
     - Too many non-blocking read actions submitted at once. Please use coalesceBy, BoundedTaskExecutor or another way of
       limiting the number of concurrently running threads.: 11 with similar stack traces are currently active
     - No dependencies provided which causes CachedValue to be never recalculated again. If this is intentional, please
-      use
-      ModificationTracker.NEVER_CHANGED
+      use ModificationTracker.NEVER_CHANGED
 
 ## [0.1.0]
 

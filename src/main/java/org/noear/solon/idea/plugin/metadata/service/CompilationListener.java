@@ -2,6 +2,7 @@ package org.noear.solon.idea.plugin.metadata.service;
 
 import com.intellij.openapi.compiler.CompilationStatusListener;
 import com.intellij.openapi.compiler.CompileContext;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -19,8 +20,8 @@ import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
 class CompilationListener implements CompilationStatusListener, ProjectTaskListener {
+    private static final Logger log = Logger.getInstance(CompilationListener.class);
     private final Project project;
-
 
     CompilationListener(Project project) {
         this.project = project;
@@ -102,13 +103,18 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
     private void refreshModuleAndDependencies(
             Iterable<Module> modules, Collection<VirtualFile> additionalMetaFiles) {
         for (Module module : modules) {
+            if (module.isDisposed()) continue;
             ModuleMetadataServiceImpl mms = (ModuleMetadataServiceImpl) module.getServiceIfCreated(
                     ModuleMetadataService.class);
             if (mms != null) {
                 mms.refreshMetadata(additionalMetaFiles);
             }
-            refreshModuleAndDependencies(ModuleManager.getInstance(project).getModuleDependentModules(module),
-                    additionalMetaFiles);
+            try {
+                refreshModuleAndDependencies(ModuleManager.getInstance(project).getModuleDependentModules(module),
+                        additionalMetaFiles);
+            } catch (Exception e) {
+                log.warn("refreshModuleAndDependencies failed", e);
+            }
         }
     }
 }
