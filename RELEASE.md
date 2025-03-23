@@ -1,5 +1,7 @@
 # 打包说明
+
 ## [gradle.properties](gradle.properties)
+
 1. pluginVersion 为插件版本
 2. pluginSinceBuild与pluginUntilBuild 参考 https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html#build-number-format
 3. platformVersion 参考 https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#configuration-intellij-extension
