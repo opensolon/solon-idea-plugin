@@ -100,7 +100,7 @@ final class ProjectClassMetadataService implements Disposable {
       for (String fieldName : writableProperties) {
         PsiField field = valueClass.findFieldByName(fieldName, true);
         if (field == null) continue;
-        PropertyName name = basename.append(PropertyName.toKebabCase(fieldName));
+        PropertyName name = basename.append(fieldName); //PropertyName.toKebabCase(fieldName)
         ConfigurationMetadata.Property meta = new ConfigurationMetadata.Property();
         meta.setName(name.toString());
         PsiType propertyType = PropertyUtil.getPropertyType(field);

@@ -44,7 +44,7 @@ public class PropertyName extends ConfigurationPropertyName {
 
 
   public static PropertyName ofCamelCase(String camelCase) {
-    return of(toKebabCase(camelCase));
+    return of(camelCase); //of(toKebabCase(camelCase));
   }
 
 
