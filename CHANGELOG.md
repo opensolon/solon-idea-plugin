@@ -2,6 +2,13 @@
 
 # Solon Changelog
 
+## [0.1.3]
+
+### Updated
+
+- Configuration property names use entity field names 
+
+
 ## [0.1.2]
 
 ### Updated
