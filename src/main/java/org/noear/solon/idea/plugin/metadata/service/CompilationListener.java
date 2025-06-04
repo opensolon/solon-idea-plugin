@@ -35,7 +35,7 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
      */
     @Override
     public void compilationFinished(boolean aborted, int errors, int warnings, @NotNull CompileContext compileContext) {
-        enqueueBackgroundReloadTask("CompilationFinished", List.of(compileContext.getCompileScope().getAffectedModules()));
+        enqueueBackgroundReloadTask("CompilationFinished", null);
     }
 
 
@@ -74,6 +74,9 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
                 indicator.setIndeterminate(false);
                 List<VirtualFile> affectedClassRoots = new ArrayList<>();
                 double i = 0;
+                if (affectedModules == null) {
+                    affectedModules = List.of(compileContext.getCompileScope().getAffectedModules());
+                }
                 for (Module module : affectedModules) {
                     assert module.getProject().equals(project);   // The 2 topics we are listening are all project-level.
                     indicator.setText2(module.getName());
