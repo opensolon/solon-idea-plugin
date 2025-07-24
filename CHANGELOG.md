@@ -2,6 +2,15 @@
 
 # Solon Changelog
 
+
+## [0.1.4]
+
+### Updated
+
+- fixed: Read access is allowed from inside read-action only
+
+
+
 ## [0.1.3]
 
 ### Updated

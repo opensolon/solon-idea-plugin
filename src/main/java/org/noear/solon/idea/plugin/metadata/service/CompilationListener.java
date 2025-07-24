@@ -74,15 +74,18 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
                 indicator.setIndeterminate(false);
                 List<VirtualFile> affectedClassRoots = new ArrayList<>();
                 double i = 0;
-                if (affectedModules == null) {
-                    affectedModules = List.of(compileContext.getCompileScope().getAffectedModules());
+//                if (affectedModules == null) {
+//                    affectedModules = List.of(compileContext.getCompileScope().getAffectedModules());
+//                }
+                if(affectedModules != null) {
+                    for (Module module : affectedModules) {
+                        assert module.getProject().equals(project);   // The 2 topics we are listening are all project-level.
+                        indicator.setText2(module.getName());
+                        indicator.setFraction(i++ / affectedModules.size());
+                        affectedClassRoots.addAll(Arrays.asList(ModuleRootUtils.getClassRootsWithoutLibraries(module)));
+                    }
                 }
-                for (Module module : affectedModules) {
-                    assert module.getProject().equals(project);   // The 2 topics we are listening are all project-level.
-                    indicator.setText2(module.getName());
-                    indicator.setFraction(i++ / affectedModules.size());
-                    affectedClassRoots.addAll(Arrays.asList(ModuleRootUtils.getClassRootsWithoutLibraries(module)));
-                }
+
                 indicator.popState();
                 List<VirtualFile> newMetaFiles = affectedClassRoots.stream()
                         .map(MetadataFileIndex::findMetaFileInClassRoot)
