@@ -3,6 +3,7 @@
     <id>org.noear.solon.idea.plugin</id>
     <name>Solon</name>
     <vendor url="https://solon.noear.org" email="noear@live.cn">noearorg</vendor>
+    <description>Provides a New project wizard. Provides completion hints for application propfiles.</description>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
