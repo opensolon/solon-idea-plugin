@@ -14,7 +14,9 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.noear.solon.idea.plugin.common.util.ProjectUtil;
 import org.noear.solon.idea.plugin.metadata.index.AggregatedMetadataIndex;
 import org.noear.solon.idea.plugin.metadata.index.FileMetadataSource;
 import org.noear.solon.idea.plugin.metadata.index.MetadataIndex;
@@ -27,7 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-final class ModuleMetadataServiceImpl implements ModuleMetadataService {
+public final class ModuleMetadataServiceImpl implements ModuleMetadataService {
     private static final Logger LOG = Logger.getInstance(ModuleMetadataServiceImpl.class);
     private final Project project;
     private final Module module;
@@ -55,7 +57,7 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
         return index;
     }
 
-    synchronized void refreshMetadata() {
+    public synchronized void refreshMetadata() {
         if (DumbService.isDumb(project)) {
             return;
         }
@@ -70,16 +72,19 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
 
 
     synchronized void refreshMetadata(Collection<VirtualFile> unIndexedMetaFiles) {
-        System.out.println("refreshMetadata start");
-        LOG.trace("Try refreshing metadata for module " + this.module.getName());
         @NotNull GlobalSearchScope scope = new ModuleScope(this.module);
-        Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
-            HashSet<VirtualFile> metafiles = new HashSet<>(MetadataFileIndex.getFiles(scope));
-            for (VirtualFile metafile : unIndexedMetaFiles) {
-                if (scope.accept(metafile)) metafiles.add(metafile);
-            }
-            return metafiles;
-        });
+        Collection<VirtualFile> files;
+        if (CollectionUtils.isEmpty(unIndexedMetaFiles)) {
+            files = ProjectUtil.getAdditionalProjectRootsToIndex(project);
+        } else {
+            files = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
+                HashSet<VirtualFile> metafiles = new HashSet<>(MetadataFileIndex.getFiles(scope));
+                for (VirtualFile metafile : unIndexedMetaFiles) {
+                    if (scope.accept(metafile)) metafiles.add(metafile);
+                }
+                return metafiles;
+            });
+        }
         if (this.index instanceof AggregatedMetadataIndex aidx) {
             aidx.refresh();
         }
@@ -89,26 +94,25 @@ final class ModuleMetadataServiceImpl implements ModuleMetadataService {
                 .collect(Collectors.toSet());
         if (currentFiles.containsAll(files.stream().map(VirtualFile::getUrl).collect(Collectors.toSet()))) {
             // No new metadata files, can stop here.
-            System.out.println("refreshMetadata end");
+            LOG.info("Module \"" + this.module.getName() + "\"'s metadata is up-to-date");
             return;
         }
         // Because the MetadataFileIndex may lag of the creation of new metafiles,
         // we only accept new metafiles from the index (but won't remove files even if the index doesn't contain it),
         // the removal of the non-exists ones is done by AggregatedMetadataIndex#refresh()
         files.removeIf(vf -> currentFiles.contains(vf.getUrl()));
-        LOG.warn("Module \"" + this.module.getName() + "\"'s metadata needs refresh");
-        LOG.warn("New metadata files: " + files);
+        LOG.info("Module \"" + this.module.getName() + "\"'s metadata needs refresh");
         ProjectMetadataService pms = project.getService(ProjectMetadataService.class);
         AggregatedMetadataIndex meta = this.index instanceof AggregatedMetadataIndex
                 ? (AggregatedMetadataIndex) this.index
                 : new AggregatedMetadataIndex();
         for (VirtualFile file : files) {
+            LOG.info("Adding metadata file: " + file.getUrl());
             meta.addLast(pms.getIndexForMetaFile(file));
         }
         if (!meta.isEmpty()) {
             this.index = meta;
         }
-        System.out.println("refreshMetadata with new index end");
     }
 
 

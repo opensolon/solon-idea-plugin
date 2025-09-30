@@ -8,7 +8,9 @@ import com.intellij.codeInsight.lookup.LookupElementDecorator;
 import com.intellij.codeInsight.lookup.VariableLookupItem;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -36,8 +38,8 @@ import static org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyN
 
 @Service(Service.Level.PROJECT)
 public final class CompletionService {
+    private static final Logger LOG = Logger.getInstance(CompletionService.class);
     private final Project project;
-
 
     public CompletionService(Project project) {
         this.project = project;
@@ -275,9 +277,20 @@ public final class CompletionService {
             // Fully unsupported property should not be included in suggestions
             return null;
         }
-        LookupElementBuilder leb = LookupElementBuilder.create(removeParent(propertyNameAncestors, property.getNameStr()))
-                .withIcon(property.getIcon().getSecond()).withPsiElement(new SourceContainer(property, project))
-                .withStrikeoutness(deprecation != null);
+        LookupElementBuilder leb = null;
+        try {
+            leb = LookupElementBuilder
+                    .create(removeParent(propertyNameAncestors, property.getNameStr()))
+                    .withIcon(property.getIcon().getSecond()).withPsiElement(new SourceContainer(property, project))
+                    .withStrikeoutness(deprecation != null);
+        } catch (ProcessCanceledException e) {
+            LOG.error("[ProcessCanceledException]Error while creating lookup element for property: " + property.getNameStr());
+            return null;
+        } catch (Exception e) {
+            LOG.error("Error while creating lookup element for property: " + property.getNameStr(), e);
+            return null;
+        }
+
         if (StringUtils.isNotBlank(property.getMetadata().getDescription())) {
             leb = leb.withTailText("(" + property.getMetadata().getDescription() + ")", true);
         }

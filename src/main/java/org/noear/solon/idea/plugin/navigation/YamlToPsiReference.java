@@ -16,7 +16,7 @@ class YamlToPsiReference extends SolonPropertyToPsiReference<YAMLKeyValue> {
 
     @Override
     protected Iterator<String> candidateKeys(YAMLKeyValue key) {
-        PropertyName fullKey = PropertyName.adapt(YAMLUtil.getConfigFullName(key));
+        PropertyName fullKey = this.getPropertyName(key);
         PropertyName thisKey = PropertyName.adapt(key.getKeyText());
         assert fullKey.toString().endsWith(thisKey.toString());
         PropertyName prefix = fullKey.chop(fullKey.getNumberOfElements() - thisKey.getNumberOfElements());
@@ -35,6 +35,11 @@ class YamlToPsiReference extends SolonPropertyToPsiReference<YAMLKeyValue> {
                 return prefix.append(n).toString();
             }
         };
+    }
+
+    @Override
+    protected PropertyName getPropertyName(YAMLKeyValue source) {
+        return PropertyName.adapt(YAMLUtil.getConfigFullName(source));
     }
 
 
