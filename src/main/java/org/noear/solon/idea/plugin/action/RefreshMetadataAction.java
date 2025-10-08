@@ -6,9 +6,14 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import org.noear.solon.idea.plugin.common.util.ProjectUtil;
 import org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService;
 import org.noear.solon.idea.plugin.metadata.service.ModuleMetadataServiceImpl;
+
+import java.util.Set;
 
 public class RefreshMetadataAction extends AnAction {
 
@@ -20,12 +25,14 @@ public class RefreshMetadataAction extends AnAction {
         PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
         if (psiFile == null) return;
 
-        Module module = ModuleUtil.findModuleForFile(psiFile.getVirtualFile(), e.getProject());
+        Project project = e.getProject();
+        Module module = ModuleUtil.findModuleForFile(psiFile.getVirtualFile(), project);
         if (module == null) return;
 
         ModuleMetadataService service = module.getService(ModuleMetadataService.class);
         if (service instanceof ModuleMetadataServiceImpl impl) {
-            impl.refreshMetadata();
+            Set<VirtualFile> additionalProjectRootsToIndex = ProjectUtil.getAdditionalProjectRootsToIndex(project);
+            impl.refreshMetadata(additionalProjectRootsToIndex, true);
         }
     }
 }

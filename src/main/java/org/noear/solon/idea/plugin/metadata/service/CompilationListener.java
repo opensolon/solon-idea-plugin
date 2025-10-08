@@ -113,7 +113,7 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
             ModuleMetadataServiceImpl mms = (ModuleMetadataServiceImpl) module.getServiceIfCreated(
                     ModuleMetadataService.class);
             if (mms != null) {
-                mms.refreshMetadata(additionalMetaFiles);
+                mms.refreshMetadata(additionalMetaFiles, false);
             }
             try {
                 refreshModuleAndDependencies(ModuleManager.getInstance(project).getModuleDependentModules(module),

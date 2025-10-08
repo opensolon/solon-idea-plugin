@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
+import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -71,10 +72,14 @@ public class ConfigurationMetadataIndex extends MetadataIndexBase {
         if (propertyName.contains("*")) {
             String patternPropertyName = propertyName
                     .replace(".", "\\.")
+                    .replace("[", "\\[")
+                    .replace("]", "\\]")
                     .replace("*", ".*");
             this.patterns.add(Pattern.compile(patternPropertyName));
             MetadataPropertyImpl prop = new MetadataPropertyImpl(this, p);
             this.patternNameAndProperties.put(patternPropertyName, prop);
+            PropertyName key = PropertyName.of(p.getName());
+            super.putIntoNameIndex(key, prop);
         } else {
             super.add(p);
         }

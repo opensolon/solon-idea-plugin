@@ -170,7 +170,7 @@ abstract class MetadataIndexBase implements MetadataIndex {
             try {
                 add(p);
             } catch (Exception e) {
-                LOG.warn("Invalid property " + p.getName() + " in " + source + ", skipped", e);
+                LOG.error("Invalid property " + p.getName() + " in " + source + ", skipped, err: " + e.getMessage(), e);
             }
         });
     }

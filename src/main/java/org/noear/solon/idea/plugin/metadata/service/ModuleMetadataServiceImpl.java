@@ -14,7 +14,6 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.noear.solon.idea.plugin.common.util.ProjectUtil;
 import org.noear.solon.idea.plugin.metadata.index.AggregatedMetadataIndex;
@@ -24,7 +23,6 @@ import org.noear.solon.idea.plugin.metadata.source.MetadataFileIndex;
 import org.noear.solon.idea.plugin.misc.ModuleRootUtils;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,34 +55,38 @@ public final class ModuleMetadataServiceImpl implements ModuleMetadataService {
         return index;
     }
 
-    public synchronized void refreshMetadata() {
+    public void refreshMetadata() {
+        Collection<VirtualFile> files = ProjectUtil.getAdditionalProjectRootsToIndex(project);
+        this.refreshMetadataWithNoBlock(files, false);
+    }
+
+    public void refreshMetadata(boolean forceFlag) {
+        Collection<VirtualFile> files = ProjectUtil.getAdditionalProjectRootsToIndex(project);
+        this.refreshMetadataWithNoBlock(files, forceFlag);
+    }
+
+    public void refreshMetadataWithNoBlock(Collection<VirtualFile> unIndexedMetaFiles, boolean forceFlag) {
         if (DumbService.isDumb(project)) {
             return;
         }
         ReadAction.nonBlocking(() -> {
-                    refreshMetadata(Collections.emptySet());
+                    refreshMetadata(unIndexedMetaFiles, forceFlag);
                     return null;
                 })
                 .inSmartMode(project)
                 .submit(AppExecutorUtil.getAppExecutorService());
-
     }
 
 
-    synchronized void refreshMetadata(Collection<VirtualFile> unIndexedMetaFiles) {
+    public synchronized void refreshMetadata(Collection<VirtualFile> unIndexedMetaFiles, boolean forceFlag) {
         @NotNull GlobalSearchScope scope = new ModuleScope(this.module);
-        Collection<VirtualFile> files;
-        if (CollectionUtils.isEmpty(unIndexedMetaFiles)) {
-            files = ProjectUtil.getAdditionalProjectRootsToIndex(project);
-        } else {
-            files = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
-                HashSet<VirtualFile> metafiles = new HashSet<>(MetadataFileIndex.getFiles(scope));
-                for (VirtualFile metafile : unIndexedMetaFiles) {
-                    if (scope.accept(metafile)) metafiles.add(metafile);
-                }
-                return metafiles;
-            });
-        }
+        Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
+            HashSet<VirtualFile> metafiles = new HashSet<>(MetadataFileIndex.getFiles(scope));
+            for (VirtualFile metafile : unIndexedMetaFiles) {
+                if (scope.accept(metafile)) metafiles.add(metafile);
+            }
+            return metafiles;
+        });
         if (this.index instanceof AggregatedMetadataIndex aidx) {
             aidx.refresh();
         }
