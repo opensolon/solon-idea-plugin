@@ -21,7 +21,6 @@ abstract class MetadataIndexBase implements MetadataIndex {
     protected final NameTreeNode propertiesAndGroupsNameIndex = new NameTreeNode();
     protected final Project project;
 
-
     protected MetadataIndexBase(Project project) {
         this.project = project;
     }
@@ -108,6 +107,7 @@ abstract class MetadataIndexBase implements MetadataIndex {
     protected void add(ConfigurationMetadata.Property p) {
         MetadataPropertyImpl prop = new MetadataPropertyImpl(this, p);
         PropertyName key = PropertyName.of(p.getName());
+
         MetadataProperty old = this.properties.put(key, prop);
         putIntoNameIndex(key, prop);
         if (old != null) {
@@ -176,7 +176,7 @@ abstract class MetadataIndexBase implements MetadataIndex {
     }
 
 
-    private void putIntoNameIndex(PropertyName key, MetadataItem value) {
+    protected void putIntoNameIndex(PropertyName key, MetadataItem value) {
         if (key.isEmpty()) {
             throw new IllegalArgumentException("Empty key is not acceptable");
         }
@@ -184,7 +184,7 @@ abstract class MetadataIndexBase implements MetadataIndex {
     }
 
 
-    private void putIntoNameIndex(PropertyName key, MetadataItem newItem, MetadataItem oldItem) {
+    protected void putIntoNameIndex(PropertyName key, MetadataItem newItem, MetadataItem oldItem) {
         NameTreeNode child = this.propertiesAndGroupsNameIndex.findChild(key);
         assert child != null;
         boolean removed = child.getData().remove(oldItem);
