@@ -311,13 +311,13 @@ public final class CompletionService {
         }
         LookupElementBuilder leb = null;
         try {
-            String lookupString = removeParent(propertyNameAncestors, property.getNameStr());
+            String lookupString = property.getNameStr();
             // 修改前缀
             // queryString: demo.aConfigMap.test.,lookupString: demo.aConfigMap.*.name
-            String resultLookupString = processLookupString(queryString, lookupString);
-            LOG.info("queryString: " + queryString + ",lookupString: " + lookupString + ",resultLookupString: " + resultLookupString);
+            String resultLookupString = processLookupString(propertyNameAncestors + queryString, lookupString);
+            LOG.info("propertyNameAncestors: " + propertyNameAncestors + ", queryString: " + queryString + ", lookupString: " + lookupString + ", resultLookupString: " + resultLookupString);
             leb = LookupElementBuilder
-                    .create(resultLookupString)
+                    .create(removeParent(propertyNameAncestors, resultLookupString))
                     .withIcon(property.getIcon().getSecond())
                     .withPsiElement(new SourceContainer(property, project))
                     .withStrikeoutness(deprecation != null);
