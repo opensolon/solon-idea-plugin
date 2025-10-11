@@ -4,6 +4,7 @@ import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.DumbModeBlockedFunctionality;
 import com.intellij.openapi.project.DumbService;
@@ -26,12 +27,17 @@ import static com.intellij.codeInsight.completion.CompletionUtil.DUMMY_IDENTIFIE
 import static com.intellij.openapi.module.ModuleUtilCore.findModuleForPsiElement;
 
 class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
+
+    private static final Logger LOG = Logger.getInstance(YamlCompletionProvider.class);
+
     @Override
     protected void addCompletions(
             @NotNull final CompletionParameters completionParameters,
             @NotNull final ProcessingContext processingContext,
             @NotNull final CompletionResultSet resultSet
     ) {
+        LOG.info("Add completion for yaml file");
+
         PsiElement element = completionParameters.getPosition();
         if (element instanceof PsiComment) {
             return;

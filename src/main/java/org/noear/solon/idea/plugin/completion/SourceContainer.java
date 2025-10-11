@@ -25,6 +25,10 @@ import java.util.Optional;
 public class SourceContainer extends LightElement {
     private final Object source;
 
+    private String lookupString;
+
+    private String processedLookupString;
+
 
     SourceContainer(@NotNull MetadataItem metadata, @NotNull Project project) {
         this(metadata, PsiManager.getInstance(project));
@@ -35,6 +39,11 @@ public class SourceContainer extends LightElement {
         this(metadata, PsiManager.getInstance(project));
     }
 
+    SourceContainer(@NotNull MetadataItem metadata, @NotNull Project project, String lookupString, String processedLookupString) {
+        this(metadata, PsiManager.getInstance(project));
+        this.lookupString = lookupString;
+        this.processedLookupString = processedLookupString;
+    }
 
     private SourceContainer(@NotNull Object metadata, @NotNull PsiManager psiManager) {
         super(psiManager, Language.ANY);
