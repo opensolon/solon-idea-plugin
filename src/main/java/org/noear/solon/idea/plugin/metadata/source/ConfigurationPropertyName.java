@@ -294,6 +294,10 @@ public class ConfigurationPropertyName implements Comparable<ConfigurationProper
         return uniformElement.toString();
     }
 
+    public ElementType getElementType(int elementIndex) {
+        return this.elements.getType(elementIndex);
+    }
+
     private CharSequence convertToOriginalForm(CharSequence element) {
         return convertElement(element, false,
                 (ch, i) -> ch == '_' || ElementsParser.isValidChar(Character.toLowerCase(ch), i));
@@ -722,7 +726,7 @@ public class ConfigurationPropertyName implements Comparable<ConfigurationProper
     /**
      * The various types of element that we can detect.
      */
-    enum ElementType {
+    public static enum ElementType {
 
         /**
          * The element is logically empty (contains no valid chars).

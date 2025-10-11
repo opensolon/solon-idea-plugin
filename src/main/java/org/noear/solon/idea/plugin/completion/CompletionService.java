@@ -17,6 +17,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiVariable;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,7 @@ import org.noear.solon.idea.plugin.metadata.index.hint.provider.HandleAsValuePro
 import org.noear.solon.idea.plugin.metadata.index.hint.value.ValueHint;
 import org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService;
 import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName;
 import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import org.noear.solon.idea.plugin.misc.PsiTypeUtils;
 
@@ -177,18 +179,39 @@ public final class CompletionService {
             PropertyName query = PropertyName.adapt(queryString);
             for (int i = 0; !candidates.isEmpty() && i < query.getNumberOfElements(); i++) {
                 String qp = query.getElement(i, UNIFORM);
+                ConfigurationPropertyName.ElementType elementType = query.getElementType(i);
 
                 candidates = candidates.parallelStream()
                         .filter(tn -> !tn.isIndexed())
                         .map(NameTreeNode::getChildren)
                         .map(trie -> {
                             if (trie.containsKey(qp)) {
-                                return trie.prefixMap(qp);
+                                SortedMap<String, NameTreeNode> map = trie.prefixMap(qp);
+                                if (MapUtils.isNotEmpty(map)) {
+                                    return map.values();
+                                }
                             }
-                            return trie.prefixMap("*");
+
+                            if (elementType == ConfigurationPropertyName.ElementType.NUMERICALLY_INDEXED) {
+                                if (MapUtils.isNotEmpty(trie)) {
+                                    return trie.values();
+                                }
+                            }
+
+                            SortedMap<String, NameTreeNode> map = trie.prefixMap("*");
+                            if (MapUtils.isNotEmpty(map)) {
+                                return map.values();
+                            }
+
+                            return trie.entrySet().stream().map(e -> {
+                                if (e.getKey().contains(qp)) {
+                                    return e.getValue();
+                                } else {
+                                    return null;
+                                }
+                            }).filter(Objects::nonNull).collect(Collectors.toList());
                         })
-                        .filter(Objects::nonNull)
-                        .flatMap(m -> m.values().parallelStream())
+                        .flatMap(Collection::parallelStream)
                         .collect(Collectors.toSet());
             }
         }
@@ -314,8 +337,14 @@ public final class CompletionService {
             String lookupString = property.getNameStr();
             // 修改前缀
             // queryString: demo.aConfigMap.test.,lookupString: demo.aConfigMap.*.name
-            String resultLookupString = processLookupString(propertyNameAncestors + queryString, lookupString);
-            LOG.info("propertyNameAncestors: " + propertyNameAncestors + ", queryString: " + queryString + ", lookupString: " + lookupString + ", resultLookupString: " + resultLookupString);
+            String concatQueryString = "";
+            if (propertyNameAncestors.endsWith(".")) {
+                concatQueryString = propertyNameAncestors + queryString;
+            } else {
+                concatQueryString = propertyNameAncestors + "." + queryString;
+            }
+            String resultLookupString = processLookupString(concatQueryString, lookupString);
+            LOG.info("propertyNameAncestors: " + propertyNameAncestors + ", queryString: " + queryString + ", concatQueryString: " + concatQueryString + ", lookupString: " + lookupString + ", resultLookupString: " + resultLookupString);
             leb = LookupElementBuilder
                     .create(removeParent(propertyNameAncestors, resultLookupString))
                     .withIcon(property.getIcon().getSecond())
