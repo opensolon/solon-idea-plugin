@@ -28,6 +28,7 @@ import org.noear.solon.idea.plugin.metadata.index.MetadataGroup;
 import org.noear.solon.idea.plugin.metadata.index.MetadataItem;
 import org.noear.solon.idea.plugin.metadata.index.MetadataProperty;
 import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName;
 import org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName.Form;
 import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import org.noear.solon.idea.plugin.misc.PsiTypeUtils;
@@ -265,8 +266,22 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
         int i = 0;
         do {
             String nameProvider = matchesTopFirst.getElement(i, Form.DASHED);
-            builder.append("\n").append(existingIndentation).append(getIndent(indentPerLevel, i))
-                    .append(nameProvider).append(":");
+            ConfigurationPropertyName.ElementType elementType = matchesTopFirst.getElementType(i);
+            if (elementType == ConfigurationPropertyName.ElementType.INDEXED) {
+                builder.append("\n")
+                        .append(existingIndentation)
+                        .append(getIndent(indentPerLevel, i))
+                        .append("-");
+            } else {
+                if (builder.toString().trim().endsWith("-")) {
+                    builder.append(" ").append(nameProvider).append(":").append(" ");
+                } else {
+                    builder.append("\n")
+                            .append(existingIndentation)
+                            .append(getIndent(indentPerLevel, i))
+                            .append(nameProvider).append(":");
+                }
+            }
             i++;
         } while (i < matchesTopFirst.getNumberOfElements());
         builder.delete(0, existingIndentation.length() + 1);

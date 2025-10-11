@@ -36,8 +36,6 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
             @NotNull final ProcessingContext processingContext,
             @NotNull final CompletionResultSet resultSet
     ) {
-        LOG.info("Add completion for yaml file");
-
         PsiElement element = completionParameters.getPosition();
         if (element instanceof PsiComment) {
             return;

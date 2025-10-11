@@ -32,9 +32,6 @@ class PropertiesCompletionProvider extends CompletionProvider<CompletionParamete
             @NotNull ProcessingContext processingContext,
             @NotNull CompletionResultSet resultSet
     ) {
-
-        LOG.info("Add completion for properties file");
-
         PsiElement element = completionParameters.getPosition();
         if (element instanceof PsiComment) return;
 

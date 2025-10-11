@@ -14,18 +14,20 @@ import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName.Form.UNIFORM;
 
 @Data
 public class NameTreeNode {
     private static final Logger LOG = Logger.getInstance(NameTreeNode.class);
+    private static final Pattern NUMERIC_PATTERN = Pattern.compile("\\[.*\\]");
     private final PatriciaTrie<NameTreeNode> children = new PatriciaTrie<>();
     private final List<MetadataItem> data = new LinkedList<>();
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private IndexedType indexedType = IndexedType.NONE;
-
 
     public static NameTreeNode merge(NameTreeNode n1, NameTreeNode n2) {
         NameTreeNode dst = new NameTreeNode();
@@ -44,16 +46,13 @@ public class NameTreeNode {
         return dst;
     }
 
-
     public Trie<String, NameTreeNode> getChildren() {
         return UnmodifiableTrie.unmodifiableTrie(children);
     }
 
-
     public boolean isIndexed() {
         return this.indexedType != IndexedType.NONE;
     }
-
 
     @Nullable
     public NameTreeNode findChild(PropertyName name) {
@@ -70,7 +69,24 @@ public class NameTreeNode {
                 return null;
             }
         } else {
-            child = this.children.get(name.getElement(0, UNIFORM));
+            String queryStr = name.getElement(0, UNIFORM);
+            if (NUMERIC_PATTERN.matcher(name.toString()).matches()) {
+                return this;
+            }
+            child = this.children.get(queryStr);
+            if (child == null) {
+                if (this.children.containsKey("*")) {
+                    child = this.children.get("*");
+                } else {
+                    return this.children.entrySet().stream().map(e -> {
+                        if (e.getKey().contains(queryStr)) {
+                            return e.getValue();
+                        } else {
+                            return null;
+                        }
+                    }).filter(Objects::nonNull).findFirst().orElse(null);
+                }
+            }
         }
         if (child == null) {
             return null;
