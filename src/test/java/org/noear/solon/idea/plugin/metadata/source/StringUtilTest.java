@@ -4,16 +4,15 @@ import org.noear.solon.idea.plugin.common.util.StringUtil;
 
 public class StringUtilTest {
     public static void main(String[] args) {
-        //  queryString: demo.
+//  queryString: demo.
         //  lookupString: demo.aConfigMap.*.name
         //  resultLookupString: demo.aConfigMap.*.name
         testProcessLookupString("demo.", "demo.aConfigMap.*.name", "demo.aConfigMap.*.name");
-        
+
         // queryString: demo.aConfigMap.ueryString: demo.bConfigs[10]
         // lookupString: demo.bConfigs[*].defaultValue
         // resultLookupString: demo.bConfigs[10].defaultValue
-        testProcessLookupString("demo.bConfigs[10]", "demo.bConfigs.*.defaultValue", "demo.bConfigs[10].defaultValue");
-
+        testProcessLookupString("demo.bConfigs[10]", "demo.bConfigs[*].defaultValue", "demo.bConfigs[10].defaultValue");
         //  queryString: demo.aConfigMap.aaaff
         //  lookupString: demo.aConfigMap.*.defaultValue
         //  resultLookupString: demo.aConfigMap.aaaff.defaultValue
