@@ -8,6 +8,7 @@ import com.intellij.diff.tools.util.text.LineOffsets;
 import com.intellij.diff.tools.util.text.LineOffsetsUtil;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
@@ -41,6 +42,8 @@ import static org.noear.solon.idea.plugin.common.util.GenericUtil.*;
 class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
     public static final YamlKeyInsertHandler INSTANCE = new YamlKeyInsertHandler();
     private static final String CARET = "<caret>";
+
+    private static final Logger LOG = Logger.getInstance(YamlKeyInsertHandler.class);
 
 
     private YamlKeyInsertHandler() {
@@ -97,6 +100,7 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
         }
         String suggestionWithCaret = prefix +
                 getSuggestionReplacementWithCaret(project, suggestion, suggestionName, existingIndentation, indentPerLevel);
+        LOG.info("Inserting suggestion: " + suggestionWithCaret);
         String suggestionWithoutCaret = suggestionWithCaret.replace(CARET, "");
 
         insertStringAtCaret(context.getEditor(), suggestionWithoutCaret, false, true, getCaretIndex(suggestionWithCaret));
@@ -258,6 +262,7 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
                 getOverallIndent(existingIndentation, indentPerLevel, matchesTopFirst.getNumberOfElements());
         String suffix = getPlaceholderSuffixWithCaret(project, suggestion, indentForNextLevel);
         builder.append(suffix);
+
         return builder.toString();
     }
 

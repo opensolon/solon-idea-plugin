@@ -26,6 +26,7 @@ import org.noear.solon.idea.plugin.completion.SourceContainer;
 import org.noear.solon.idea.plugin.metadata.index.MetadataGroup;
 import org.noear.solon.idea.plugin.metadata.index.MetadataItem;
 import org.noear.solon.idea.plugin.metadata.index.MetadataProperty;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
 import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import org.noear.solon.idea.plugin.misc.PsiTypeUtils;
 
@@ -73,6 +74,7 @@ class PropertiesKeyInsertHandler implements InsertHandler<LookupElement> {
         deleteLookupTextHonerCompletionChar(context, currentElement);
 
         String suggestionWithCaret = getSuggestionReplacementWithCaret(project, lookupElement, suggestion);
+        LOG.info("Inserting suggestion: " + suggestionWithCaret);
         char delimiter = getCodeStyleDelimiter(project);
         if (StringUtils.removeEnd(suggestionWithCaret, CARET).endsWith(String.valueOf(delimiter))) {
             if (hasSeparator(getStringAfterCaret(context), delimiter)) {
@@ -153,6 +155,14 @@ class PropertiesKeyInsertHandler implements InsertHandler<LookupElement> {
 
     @NotNull
     private String getSuggestionReplacementWithCaret(@NotNull Project project, LookupElement lookupElement, MetadataItem suggestion) {
+        String suggestionReplacementWithCaret = this.doGetSuggestionReplacementWithCaret(project, lookupElement, suggestion);
+        if (suggestionReplacementWithCaret.contains("*")) {
+            suggestionReplacementWithCaret = suggestionReplacementWithCaret.replace("*", CARET);
+        }
+        return suggestionReplacementWithCaret;
+    }
+
+    private String doGetSuggestionReplacementWithCaret(@NotNull Project project, LookupElement lookupElement, MetadataItem suggestion) {
         char delimiter = getCodeStyleDelimiter(project);
         String lookupString = lookupElement.getLookupString();
         String nameStr = suggestion.getNameStr();
@@ -165,7 +175,14 @@ class PropertiesKeyInsertHandler implements InsertHandler<LookupElement> {
         } else if (suggestion instanceof MetadataProperty property) {
             PsiType propType = property.getFullType().orElse(null);
             if (PsiTypeUtils.isValueType(propType)) {
-                return suggestionWithCaretPrefix + delimiter + CARET;
+                ConfigurationMetadata.Property metadata = property.getMetadata();
+                if (metadata.getType().contains("[")
+                        && metadata.getType().contains("]")) {
+                    return suggestionWithCaretPrefix + "[" + CARET + "]" + delimiter + CARET;
+                } else {
+                    return suggestionWithCaretPrefix + delimiter + CARET;
+                }
+
             } else if (PsiTypeUtils.isCollection(project, propType)) {
                 //TODO Auto generate numeric index for this
                 return suggestionWithCaretPrefix + "[" + CARET + "]" + delimiter;

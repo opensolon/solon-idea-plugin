@@ -18,6 +18,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiVariable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.Trie;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -198,9 +199,12 @@ public final class CompletionService {
                                 }
                             }
 
-                            SortedMap<String, NameTreeNode> map = trie.prefixMap("*");
-                            if (MapUtils.isNotEmpty(map)) {
-                                return map.values();
+                            NameTreeNode nameTreeNode = trie.get("*");
+                            if (Objects.nonNull(nameTreeNode)) {
+                                Trie<String, NameTreeNode> children = nameTreeNode.getChildren();
+                                if (MapUtils.isNotEmpty(children)) {
+                                    return children.values();
+                                }
                             }
 
                             return trie.entrySet().stream().map(e -> {
@@ -337,11 +341,13 @@ public final class CompletionService {
             String lookupString = property.getNameStr();
             // 修改前缀
             // queryString: demo.aConfigMap.test.,lookupString: demo.aConfigMap.*.name
-            String concatQueryString = "";
-            if (propertyNameAncestors.endsWith(".")) {
-                concatQueryString = propertyNameAncestors + queryString;
-            } else {
-                concatQueryString = propertyNameAncestors + "." + queryString;
+            String concatQueryString = queryString;
+            if (StringUtils.isNotBlank(propertyNameAncestors)) {
+                if (propertyNameAncestors.endsWith(".")) {
+                    concatQueryString = propertyNameAncestors + queryString;
+                } else {
+                    concatQueryString = propertyNameAncestors + "." + queryString;
+                }
             }
             String resultLookupString = processLookupString(concatQueryString, lookupString);
             LOG.info("propertyNameAncestors: " + propertyNameAncestors + ", queryString: " + queryString + ", concatQueryString: " + concatQueryString + ", lookupString: " + lookupString + ", resultLookupString: " + resultLookupString);
