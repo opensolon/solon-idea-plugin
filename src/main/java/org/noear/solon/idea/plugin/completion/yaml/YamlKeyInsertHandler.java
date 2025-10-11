@@ -27,6 +27,7 @@ import org.noear.solon.idea.plugin.completion.SourceContainer;
 import org.noear.solon.idea.plugin.metadata.index.MetadataGroup;
 import org.noear.solon.idea.plugin.metadata.index.MetadataItem;
 import org.noear.solon.idea.plugin.metadata.index.MetadataProperty;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
 import org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName.Form;
 import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import org.noear.solon.idea.plugin.misc.PsiTypeUtils;
@@ -249,6 +250,17 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
             @NotNull Project project, MetadataItem suggestion,
             PropertyName matchesTopFirst, String existingIndentation, String indentPerLevel
     ) {
+        String suggestionReplacementWithCaret = this.doGetSuggestionReplacementWithCaret(project, suggestion, matchesTopFirst, existingIndentation, indentPerLevel);
+        if (suggestionReplacementWithCaret.contains("*")) {
+            suggestionReplacementWithCaret = suggestionReplacementWithCaret.replace("*", CARET);
+        }
+        return suggestionReplacementWithCaret;
+    }
+
+    private String doGetSuggestionReplacementWithCaret(
+            @NotNull Project project, MetadataItem suggestion,
+            PropertyName matchesTopFirst, String existingIndentation, String indentPerLevel
+    ) {
         StringBuilder builder = new StringBuilder();
         int i = 0;
         do {
@@ -275,7 +287,13 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
         } else if (suggestion instanceof MetadataProperty property) {
             PsiType propType = property.getFullType().orElse(null);
             if (PsiTypeUtils.isValueType(propType)) {
-                return " " + CARET;
+                ConfigurationMetadata.Property metadata = property.getMetadata();
+                if (metadata.getType().contains("[")
+                        && metadata.getType().contains("]")) {
+                    return "\n" + indentForNextLevel + "- " + CARET;
+                } else {
+                    return " " + CARET;
+                }
             } else if (PsiTypeUtils.isCollection(project, propType)) {
                 return "\n" + indentForNextLevel + "- " + CARET;
             } else if (PsiTypeUtils.isMap(project, propType)) { // map or class

@@ -182,7 +182,6 @@ class PropertiesKeyInsertHandler implements InsertHandler<LookupElement> {
                 } else {
                     return suggestionWithCaretPrefix + delimiter + CARET;
                 }
-
             } else if (PsiTypeUtils.isCollection(project, propType)) {
                 //TODO Auto generate numeric index for this
                 return suggestionWithCaretPrefix + "[" + CARET + "]" + delimiter;
