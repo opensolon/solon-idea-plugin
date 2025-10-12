@@ -8,12 +8,17 @@ import com.intellij.codeInsight.lookup.LookupElementDecorator;
 import com.intellij.codeInsight.lookup.VariableLookupItem;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiVariable;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.Trie;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +29,7 @@ import org.noear.solon.idea.plugin.metadata.index.hint.provider.HandleAsValuePro
 import org.noear.solon.idea.plugin.metadata.index.hint.value.ValueHint;
 import org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService;
 import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName;
 import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import org.noear.solon.idea.plugin.misc.PsiTypeUtils;
 
@@ -32,12 +38,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.intellij.openapi.module.ModuleUtilCore.findModuleForPsiElement;
+import static org.noear.solon.idea.plugin.common.util.StringUtil.processLookupString;
 import static org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName.Form.UNIFORM;
 
 @Service(Service.Level.PROJECT)
 public final class CompletionService {
+    private static final Logger LOG = Logger.getInstance(CompletionService.class);
     private final Project project;
-
 
     public CompletionService(Project project) {
         this.project = project;
@@ -56,17 +63,27 @@ public final class CompletionService {
         }
     }
 
+    private static @NotNull PrefixMatcher getRegexPrefixMatcher(@Nullable PrefixMatcher prefixMatcher, String queryString) {
+        if (prefixMatcher == null || StringUtils.isBlank(prefixMatcher.getPrefix())) {
+            return new RegexPrefixMatcher(queryString, false);
+        } else {
+            return prefixMatcher;
+        }
+    }
+
     public boolean findSuggestionForKey(
             @NotNull CompletionParameters completionParameters, @NotNull CompletionResultSet resultSet,
             @Nullable String parentName, String queryString, InsertHandler<LookupElement> insertHandler
     ) {
         Module module = findModule(completionParameters);
+        PrefixMatcher prefixMatcher = resultSet.getPrefixMatcher();
+
         Collection<MetadataItem> candidates = findProperty(module, parentName, queryString);
         List<? extends LookupElement> suggestions = null;
         if (!candidates.isEmpty()) {
             suggestions = candidates.stream().map(metaItem -> {
                         if (metaItem instanceof MetadataProperty property) {
-                            return createLookupElement(parentName, property);
+                            return createLookupElement(parentName, queryString, property, prefixMatcher);
                         } else if (metaItem instanceof MetadataGroup group) {
                             return createLookupElement(parentName, group);
                         } else {
@@ -83,10 +100,13 @@ public final class CompletionService {
             suggestions = completionForMapKey(
                     property, completionParameters, resultSet.getPrefixMatcher(), queryString, insertHandler);
         }
+
         if (suggestions != null && !suggestions.isEmpty()) {
+            LOG.info("findSuggestionForKey: parentName=" + parentName + ", queryString=" + queryString + ", suggestions: " + suggestions.size());
             resultSet.addAllElements(suggestions);
             return true;
         } else {
+            LOG.info("findSuggestionForKey: parentName=" + parentName + ", queryString=" + queryString + ", no suggestions found");
             return false;
         }
     }
@@ -160,8 +180,43 @@ public final class CompletionService {
             PropertyName query = PropertyName.adapt(queryString);
             for (int i = 0; !candidates.isEmpty() && i < query.getNumberOfElements(); i++) {
                 String qp = query.getElement(i, UNIFORM);
-                candidates = candidates.parallelStream().filter(tn -> !tn.isIndexed()).map(NameTreeNode::getChildren)
-                        .map(trie -> trie.prefixMap(qp)).flatMap(m -> m.values().parallelStream()).collect(Collectors.toSet());
+                ConfigurationPropertyName.ElementType elementType = query.getElementType(i);
+
+                candidates = candidates.parallelStream()
+                        .filter(tn -> !tn.isIndexed())
+                        .map(NameTreeNode::getChildren)
+                        .map(trie -> {
+                            if (trie.containsKey(qp)) {
+                                SortedMap<String, NameTreeNode> map = trie.prefixMap(qp);
+                                if (MapUtils.isNotEmpty(map)) {
+                                    return map.values();
+                                }
+                            }
+
+                            if (elementType == ConfigurationPropertyName.ElementType.NUMERICALLY_INDEXED) {
+                                if (MapUtils.isNotEmpty(trie)) {
+                                    return trie.values();
+                                }
+                            }
+
+                            NameTreeNode nameTreeNode = trie.get("*");
+                            if (Objects.nonNull(nameTreeNode)) {
+                                Trie<String, NameTreeNode> children = nameTreeNode.getChildren();
+                                if (MapUtils.isNotEmpty(children)) {
+                                    return children.values();
+                                }
+                            }
+
+                            return trie.entrySet().stream().map(e -> {
+                                if (e.getKey().contains(qp)) {
+                                    return e.getValue();
+                                } else {
+                                    return null;
+                                }
+                            }).filter(Objects::nonNull).collect(Collectors.toList());
+                        })
+                        .flatMap(Collection::parallelStream)
+                        .collect(Collectors.toSet());
             }
         }
         // get all properties in candidates;
@@ -171,7 +226,13 @@ public final class CompletionService {
             Set<NameTreeNode> nextNodes = new HashSet<>();
             for (NameTreeNode n : nodes) {
                 if (n != searchRoot) {
-                    result.addAll(n.getData());
+                    List<MetadataItem> data = n.getData();
+                    Collection<NameTreeNode> values = n.getChildren().values();
+                    if (CollectionUtils.isNotEmpty(data)) {
+                        result.addAll(data);
+                    } else if (CollectionUtils.isNotEmpty(values)) {
+                        nextNodes.addAll(values);
+                    }
                 }
                 if (!n.isIndexed()) {
                     // Suggestion should not contain indexes(Map or List), because it is hard to insert this suggestion to code.
@@ -269,15 +330,40 @@ public final class CompletionService {
         }
     }
 
-    private LookupElement createLookupElement(String propertyNameAncestors, MetadataProperty property) {
+    private LookupElement createLookupElement(String propertyNameAncestors, String queryString, MetadataProperty property, PrefixMatcher prefixMatcher) {
         ConfigurationMetadata.Property.Deprecation deprecation = property.getMetadata().getDeprecation();
         if (deprecation != null && deprecation.getLevel() == ConfigurationMetadata.Property.Deprecation.Level.ERROR) {
             // Fully unsupported property should not be included in suggestions
             return null;
         }
-        LookupElementBuilder leb = LookupElementBuilder.create(removeParent(propertyNameAncestors, property.getNameStr()))
-                .withIcon(property.getIcon().getSecond()).withPsiElement(new SourceContainer(property, project))
-                .withStrikeoutness(deprecation != null);
+        LookupElementBuilder leb = null;
+        try {
+            String lookupString = property.getNameStr();
+            // 修改前缀
+            // queryString: demo.aConfigMap.test.,lookupString: demo.aConfigMap.*.name
+            String concatQueryString = queryString;
+            if (StringUtils.isNotBlank(propertyNameAncestors)) {
+                if (propertyNameAncestors.endsWith(".")) {
+                    concatQueryString = propertyNameAncestors + queryString;
+                } else {
+                    concatQueryString = propertyNameAncestors + "." + queryString;
+                }
+            }
+            String resultLookupString = processLookupString(concatQueryString, lookupString);
+            LOG.info("propertyNameAncestors: " + propertyNameAncestors + ", queryString: " + queryString + ", concatQueryString: " + concatQueryString + ", lookupString: " + lookupString + ", resultLookupString: " + resultLookupString);
+            leb = LookupElementBuilder
+                    .create(removeParent(propertyNameAncestors, resultLookupString))
+                    .withIcon(property.getIcon().getSecond())
+                    .withPsiElement(new SourceContainer(property, project))
+                    .withStrikeoutness(deprecation != null);
+        } catch (ProcessCanceledException e) {
+            LOG.error("[ProcessCanceledException]Error while creating lookup element for property: " + property.getNameStr());
+            return null;
+        } catch (Exception e) {
+            LOG.error("Error while creating lookup element for property: " + property.getNameStr(), e);
+            return null;
+        }
+
         if (StringUtils.isNotBlank(property.getMetadata().getDescription())) {
             leb = leb.withTailText("(" + property.getMetadata().getDescription() + ")", true);
         }
@@ -299,3 +385,4 @@ public final class CompletionService {
         return key.subName(parentKey.getNumberOfElements()).toString();
     }
 }
+

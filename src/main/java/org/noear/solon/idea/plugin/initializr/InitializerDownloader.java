@@ -7,7 +7,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.newvfs.RefreshQueue;
-import com.intellij.util.PathUtil;
 import com.intellij.util.io.HttpRequests;
 import com.intellij.util.io.ZipUtil;
 import org.jetbrains.annotations.NotNull;
@@ -16,13 +15,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static java.util.Objects.requireNonNull;
 
 public class InitializerDownloader {
 
-    private static final Logger log = Logger.getInstance(InitializerDownloader.class);
+    private static final Logger LOG = Logger.getInstance(InitializerDownloader.class);
 
     private final SolonInitializrBuilder builder;
 
@@ -43,7 +41,7 @@ public class InitializerDownloader {
     void execute(ProgressIndicator indicator) throws IOException {
         File tempFile = FileUtil.createTempFile("solon-initializr-template", ".tmp", true);
         String downloadUrl = builder.getMetadata().buildDownloadUrl();
-        debug(() -> log.debug("Downloading project from: " + downloadUrl));
+        debug(() -> LOG.debug("Downloading project from: " + downloadUrl));
         Download download = HttpRequests.request(downloadUrl).connect(request -> {
             String contentType = request.getConnection().getContentType();
             boolean zip = StringUtil.isNotEmpty(contentType) && contentType.contains("zip");
@@ -67,7 +65,7 @@ public class InitializerDownloader {
 
 
     private void debug(Runnable doWhenDebug) {
-        if (log.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             doWhenDebug.run();
         }
     }

@@ -20,7 +20,7 @@ import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
 class CompilationListener implements CompilationStatusListener, ProjectTaskListener {
-    private static final Logger log = Logger.getInstance(CompilationListener.class);
+    private static final Logger LOG = Logger.getInstance(CompilationListener.class);
     private final Project project;
 
     CompilationListener(Project project) {
@@ -77,7 +77,7 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
 //                if (affectedModules == null) {
 //                    affectedModules = List.of(compileContext.getCompileScope().getAffectedModules());
 //                }
-                if(affectedModules != null) {
+                if (affectedModules != null) {
                     for (Module module : affectedModules) {
                         assert module.getProject().equals(project);   // The 2 topics we are listening are all project-level.
                         indicator.setText2(module.getName());
@@ -113,13 +113,13 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
             ModuleMetadataServiceImpl mms = (ModuleMetadataServiceImpl) module.getServiceIfCreated(
                     ModuleMetadataService.class);
             if (mms != null) {
-                mms.refreshMetadata(additionalMetaFiles);
+                mms.refreshMetadata(additionalMetaFiles, false);
             }
             try {
                 refreshModuleAndDependencies(ModuleManager.getInstance(project).getModuleDependentModules(module),
                         additionalMetaFiles);
             } catch (Exception e) {
-                log.warn("refreshModuleAndDependencies failed", e);
+                LOG.warn("refreshModuleAndDependencies failed", e);
             }
         }
     }

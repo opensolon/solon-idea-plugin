@@ -1,45 +1,49 @@
 package org.noear.solon.idea.plugin.metadata.index;
 
 import com.intellij.psi.PsiClass;
-import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
-import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
+import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 
 import javax.swing.*;
 import java.util.Optional;
 
 public interface MetadataItem {
-  /**
-   * @see ConfigurationMetadata.Property#getName()
-   * @see ConfigurationMetadata.Group#getName()
-   */
-  @NotNull String getNameStr();
+    /**
+     * @see ConfigurationMetadata.Property#getName()
+     * @see ConfigurationMetadata.Group#getName()
+     */
+    @NotNull String getNameStr();
 
-  @NotNull
-  default PropertyName getName() {
-    return PropertyName.of(getNameStr());
-  }
+    @NotNull
+    default PropertyName getName() {
+        return PropertyName.of(getNameStr());
+    }
 
-  /**
-   * @see ConfigurationMetadata.Property#getType()
-   * @see ConfigurationMetadata.Group#getType()
-   */
-  Optional<PsiClass> getType();
+    /**
+     * @see ConfigurationMetadata.Property#getType()
+     * @see ConfigurationMetadata.Group#getType()
+     */
+    Optional<PsiClass> getType();
 
-  /**
-   * @see ConfigurationMetadata.Property#getSourceType()
-   * @see ConfigurationMetadata.Group#getSourceType()
-   */
-  Optional<PsiClass> getSourceType();
+    String getTypeStr();
 
-  @NotNull Pair<String, Icon> getIcon();
+    /**
+     * @see ConfigurationMetadata.Property#getSourceType()
+     * @see ConfigurationMetadata.Group#getSourceType()
+     */
+    Optional<PsiClass> getSourceType();
 
-  /**
-   * @return Rendered(HTML) description for this item
-   */
-  @NotNull
-  String getRenderedDescription();
+    String getSourceTypeStr();
 
-  MetadataIndex getIndex();
+    @NotNull Pair<String, Icon> getIcon();
+
+    /**
+     * @return Rendered(HTML) description for this item
+     */
+    @NotNull
+    String getRenderedDescription();
+
+    MetadataIndex getIndex();
 }

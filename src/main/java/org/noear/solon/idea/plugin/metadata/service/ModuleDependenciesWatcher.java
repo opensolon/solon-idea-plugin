@@ -84,7 +84,7 @@ class ModuleDependenciesWatcher implements WorkspaceModelChangeListener {
                                     .filter(Objects::nonNull)
                                     .toList();
                             if (!metaFiles.isEmpty()) {
-                                impl.refreshMetadata(metaFiles);
+                                impl.refreshMetadata(metaFiles, false);
                             }
                             indicator.setText2("");
                         }

@@ -8,6 +8,7 @@ import com.intellij.diff.tools.util.text.LineOffsets;
 import com.intellij.diff.tools.util.text.LineOffsetsUtil;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
@@ -26,6 +27,8 @@ import org.noear.solon.idea.plugin.completion.SourceContainer;
 import org.noear.solon.idea.plugin.metadata.index.MetadataGroup;
 import org.noear.solon.idea.plugin.metadata.index.MetadataItem;
 import org.noear.solon.idea.plugin.metadata.index.MetadataProperty;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName;
 import org.noear.solon.idea.plugin.metadata.source.ConfigurationPropertyName.Form;
 import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import org.noear.solon.idea.plugin.misc.PsiTypeUtils;
@@ -41,6 +44,8 @@ import static org.noear.solon.idea.plugin.common.util.GenericUtil.*;
 class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
     public static final YamlKeyInsertHandler INSTANCE = new YamlKeyInsertHandler();
     private static final String CARET = "<caret>";
+
+    private static final Logger LOG = Logger.getInstance(YamlKeyInsertHandler.class);
 
 
     private YamlKeyInsertHandler() {
@@ -97,6 +102,7 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
         }
         String suggestionWithCaret = prefix +
                 getSuggestionReplacementWithCaret(project, suggestion, suggestionName, existingIndentation, indentPerLevel);
+        LOG.info("Inserting suggestion: " + suggestionWithCaret);
         String suggestionWithoutCaret = suggestionWithCaret.replace(CARET, "");
 
         insertStringAtCaret(context.getEditor(), suggestionWithoutCaret, false, true, getCaretIndex(suggestionWithCaret));
@@ -245,12 +251,37 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
             @NotNull Project project, MetadataItem suggestion,
             PropertyName matchesTopFirst, String existingIndentation, String indentPerLevel
     ) {
+        String suggestionReplacementWithCaret = this.doGetSuggestionReplacementWithCaret(project, suggestion, matchesTopFirst, existingIndentation, indentPerLevel);
+        if (suggestionReplacementWithCaret.contains("*")) {
+            suggestionReplacementWithCaret = suggestionReplacementWithCaret.replace("*", CARET);
+        }
+        return suggestionReplacementWithCaret;
+    }
+
+    private String doGetSuggestionReplacementWithCaret(
+            @NotNull Project project, MetadataItem suggestion,
+            PropertyName matchesTopFirst, String existingIndentation, String indentPerLevel
+    ) {
         StringBuilder builder = new StringBuilder();
         int i = 0;
         do {
             String nameProvider = matchesTopFirst.getElement(i, Form.DASHED);
-            builder.append("\n").append(existingIndentation).append(getIndent(indentPerLevel, i))
-                    .append(nameProvider).append(":");
+            ConfigurationPropertyName.ElementType elementType = matchesTopFirst.getElementType(i);
+            if (elementType == ConfigurationPropertyName.ElementType.INDEXED) {
+                builder.append("\n")
+                        .append(existingIndentation)
+                        .append(getIndent(indentPerLevel, i))
+                        .append("-");
+            } else {
+                if (builder.toString().trim().endsWith("-")) {
+                    builder.append(" ").append(nameProvider).append(":").append(" ");
+                } else {
+                    builder.append("\n")
+                            .append(existingIndentation)
+                            .append(getIndent(indentPerLevel, i))
+                            .append(nameProvider).append(":");
+                }
+            }
             i++;
         } while (i < matchesTopFirst.getNumberOfElements());
         builder.delete(0, existingIndentation.length() + 1);
@@ -258,6 +289,7 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
                 getOverallIndent(existingIndentation, indentPerLevel, matchesTopFirst.getNumberOfElements());
         String suffix = getPlaceholderSuffixWithCaret(project, suggestion, indentForNextLevel);
         builder.append(suffix);
+
         return builder.toString();
     }
 
@@ -270,7 +302,13 @@ class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
         } else if (suggestion instanceof MetadataProperty property) {
             PsiType propType = property.getFullType().orElse(null);
             if (PsiTypeUtils.isValueType(propType)) {
-                return " " + CARET;
+                ConfigurationMetadata.Property metadata = property.getMetadata();
+                if (metadata.getType().contains("[")
+                        && metadata.getType().contains("]")) {
+                    return "\n" + indentForNextLevel + "- " + CARET;
+                } else {
+                    return " " + CARET;
+                }
             } else if (PsiTypeUtils.isCollection(project, propType)) {
                 return "\n" + indentForNextLevel + "- " + CARET;
             } else if (PsiTypeUtils.isMap(project, propType)) { // map or class

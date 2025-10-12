@@ -71,5 +71,15 @@
                 serviceImplementation="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataServiceImpl"/>
 
         <postStartupActivity implementation="org.noear.solon.idea.plugin.metadata.service.MetadataStartupActivity"/>
+
     </extensions>
+
+    <actions>
+        <action id="solon.refreshMetadata"
+                class="org.noear.solon.idea.plugin.action.RefreshMetadataAction"
+                text="Refresh Solon Metadata"
+                description="Refresh Solon configuration metadata">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

@@ -11,6 +11,7 @@ import com.intellij.lang.properties.psi.PropertiesFile;
 import com.intellij.lang.properties.psi.Property;
 import com.intellij.lang.properties.psi.codeStyle.PropertiesCodeStyleSettings;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorModificationUtil;
 import com.intellij.openapi.project.Project;
@@ -25,6 +26,7 @@ import org.noear.solon.idea.plugin.completion.SourceContainer;
 import org.noear.solon.idea.plugin.metadata.index.MetadataGroup;
 import org.noear.solon.idea.plugin.metadata.index.MetadataItem;
 import org.noear.solon.idea.plugin.metadata.index.MetadataProperty;
+import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
 import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import org.noear.solon.idea.plugin.misc.PsiTypeUtils;
 
@@ -38,6 +40,7 @@ class PropertiesKeyInsertHandler implements InsertHandler<LookupElement> {
     public static final PropertiesKeyInsertHandler INSTANCE = new PropertiesKeyInsertHandler();
     private static final String CARET = "<caret>";
 
+    private static final Logger LOG = Logger.getInstance(PropertiesKeyInsertHandler.class);
 
     private PropertiesKeyInsertHandler() {
     }
@@ -70,7 +73,8 @@ class PropertiesKeyInsertHandler implements InsertHandler<LookupElement> {
 
         deleteLookupTextHonerCompletionChar(context, currentElement);
 
-        String suggestionWithCaret = getSuggestionReplacementWithCaret(project, suggestion);
+        String suggestionWithCaret = getSuggestionReplacementWithCaret(project, lookupElement, suggestion);
+        LOG.info("Inserting suggestion: " + suggestionWithCaret);
         char delimiter = getCodeStyleDelimiter(project);
         if (StringUtils.removeEnd(suggestionWithCaret, CARET).endsWith(String.valueOf(delimiter))) {
             if (hasSeparator(getStringAfterCaret(context), delimiter)) {
@@ -115,7 +119,8 @@ class PropertiesKeyInsertHandler implements InsertHandler<LookupElement> {
     @NotNull
     private String getStringAfterCaret(final InsertionContext context) {
         int offset = context.getEditor().getCaretModel().getOffset();
-        return StringUtils.substringBefore(context.getDocument().getText().substring(offset), '\n');
+        String substring = context.getDocument().getText().substring(offset);
+        return StringUtils.substringBefore(substring, '\n');
     }
 
     private boolean hasSeparator(String string, char delimiter) {
@@ -149,21 +154,41 @@ class PropertiesKeyInsertHandler implements InsertHandler<LookupElement> {
     }
 
     @NotNull
-    private String getSuggestionReplacementWithCaret(@NotNull Project project, MetadataItem suggestion) {
+    private String getSuggestionReplacementWithCaret(@NotNull Project project, LookupElement lookupElement, MetadataItem suggestion) {
+        String suggestionReplacementWithCaret = this.doGetSuggestionReplacementWithCaret(project, lookupElement, suggestion);
+        if (suggestionReplacementWithCaret.contains("*")) {
+            suggestionReplacementWithCaret = suggestionReplacementWithCaret.replace("*", CARET);
+        }
+        return suggestionReplacementWithCaret;
+    }
+
+    private String doGetSuggestionReplacementWithCaret(@NotNull Project project, LookupElement lookupElement, MetadataItem suggestion) {
         char delimiter = getCodeStyleDelimiter(project);
+        String lookupString = lookupElement.getLookupString();
+        String nameStr = suggestion.getNameStr();
+        String suggestionWithCaretPrefix = suggestion.getNameStr();
+        if (!Objects.equals(lookupString, nameStr)) {
+            suggestionWithCaretPrefix = lookupString;
+        }
         if (suggestion instanceof MetadataGroup) {
-            return suggestion.getNameStr() + "." + CARET;
+            return suggestionWithCaretPrefix + "." + CARET;
         } else if (suggestion instanceof MetadataProperty property) {
             PsiType propType = property.getFullType().orElse(null);
             if (PsiTypeUtils.isValueType(propType)) {
-                return property.getNameStr() + delimiter + CARET;
+                ConfigurationMetadata.Property metadata = property.getMetadata();
+                if (metadata.getType().contains("[")
+                        && metadata.getType().contains("]")) {
+                    return suggestionWithCaretPrefix + "[" + CARET + "]" + delimiter + CARET;
+                } else {
+                    return suggestionWithCaretPrefix + delimiter + CARET;
+                }
             } else if (PsiTypeUtils.isCollection(project, propType)) {
                 //TODO Auto generate numeric index for this
-                return property.getNameStr() + "[" + CARET + "]" + delimiter;
+                return suggestionWithCaretPrefix + "[" + CARET + "]" + delimiter;
             } else if (PsiTypeUtils.isMap(project, propType)) { // map or class
-                return property.getNameStr() + "." + CARET;
+                return suggestionWithCaretPrefix + "." + CARET;
             } else {
-                return property.getNameStr() + CARET;
+                return suggestionWithCaretPrefix + CARET;
             }
         } else {
             throw new IllegalStateException("Unsupported type of suggestion: " + suggestion.getClass());
