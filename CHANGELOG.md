@@ -2,6 +2,16 @@
 
 # Solon Changelog
 
+## [0.1.6]
+
+- 配置提示支持复杂类型跳转
+- 优化property输入体验
+- 优化yml输入体验
+- 优化yml代码提示
+
+## [0.1.5]
+
+- pluginUntilBuild 升为 252
 
 ## [0.1.4]
 
