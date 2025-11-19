@@ -70,6 +70,8 @@
                 serviceInterface="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService"
                 serviceImplementation="org.noear.solon.idea.plugin.metadata.service.ModuleMetadataServiceImpl"/>
 
+        <implicitUsageProvider implementation="org.noear.solon.idea.plugin.service.UsageProviderServiceImpl"/>
+
         <postStartupActivity implementation="org.noear.solon.idea.plugin.metadata.service.MetadataStartupActivity"/>
 
     </extensions>
