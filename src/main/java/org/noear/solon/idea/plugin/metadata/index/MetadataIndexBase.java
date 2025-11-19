@@ -1,7 +1,7 @@
 package org.noear.solon.idea.plugin.metadata.index;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.progress.CeProcessCanceledException;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -153,8 +153,8 @@ abstract class MetadataIndexBase implements MetadataIndex {
             metadata.getGroups().forEach(g -> {
                 try {
                     add(g);
-                } catch (CeProcessCanceledException e) {
-                    LOG.warn("[CeProcessCanceledException]Invalid group " + g.getName() + " in " + source + ", skipped");
+                } catch (ProcessCanceledException e) {
+                    LOG.warn("[ProcessCanceledException]Invalid group " + g.getName() + " in " + source + ", skipped");
                 } catch (Exception e) {
                     LOG.warn("Invalid group " + g.getName() + " in " + source + ", skipped", e);
                 }
@@ -164,8 +164,8 @@ abstract class MetadataIndexBase implements MetadataIndex {
             metadata.getHints().forEach(h -> {
                 try {
                     add(h);
-                } catch (CeProcessCanceledException e) {
-                    LOG.warn("[CeProcessCanceledException]Invalid hint " + h.getName() + " in " + source + ", skipped");
+                } catch (ProcessCanceledException e) {
+                    LOG.warn("[ProcessCanceledException]Invalid hint " + h.getName() + " in " + source + ", skipped");
                 } catch (Exception e) {
                     LOG.warn("Invalid hint " + h.getName() + " in " + source + ", skipped", e);
                 }
@@ -174,8 +174,8 @@ abstract class MetadataIndexBase implements MetadataIndex {
         metadata.getProperties().forEach(p -> {
             try {
                 add(p);
-            } catch (CeProcessCanceledException e) {
-                LOG.warn("[CeProcessCanceledException]Invalid property " + p.getName() + " in " + source + ", skipped");
+            } catch (ProcessCanceledException e) {
+                LOG.warn("[ProcessCanceledException]Invalid property " + p.getName() + " in " + source + ", skipped");
             } catch (Exception e) {
                 LOG.error("Invalid property " + p.getName() + " in " + source + ", skipped, err: " + e.getMessage(), e);
             }
