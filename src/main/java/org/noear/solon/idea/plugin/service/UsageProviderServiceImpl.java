@@ -17,13 +17,14 @@ import org.jetbrains.annotations.NotNull;
  * @author hans
  */
 public class UsageProviderServiceImpl implements ImplicitUsageProvider {
-    private final String[] CLASS_ANNOTATION = new String[]{"org.noear.solon.annotation.Controller","org.noear.solon.annotation.Configuration","org.noear.solon.annotation.Component"};
-    private final String[] METHOD_ANNOTATION = new String[]{"org.noear.solon.annotation.Mapping","org.noear.solon.annotation.Bean"};
-    private final String[] FIELD_ANNOTATION = new String[]{"org.apache.ibatis.solon.annotation.Db","org.noear.solon.annotation.Inject"};
+    private final String[] CLASS_ANNOTATION = new String[]{"org.noear.solon.annotation.Controller", "org.noear.solon.annotation.Configuration", "org.noear.solon.annotation.Component"};
+    private final String[] METHOD_ANNOTATION = new String[]{"org.noear.solon.annotation.Mapping", "org.noear.solon.annotation.Bean"};
+    private final String[] FIELD_ANNOTATION = new String[]{"org.noear.solon.data.annotation.Ds", "org.apache.ibatis.solon.annotation.Db", "com.jfinal.plugin.activerecord.solon.annotation.Db", "org.hibernate.solon.annotation.Db", "org.noear.solon.annotation.Inject"};
 
 
     /**
      * Class is never used
+     *
      * @param element target element
      * @return is never used
      */
@@ -55,9 +56,9 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
 
     @Override
     public boolean isImplicitWrite(@NotNull PsiElement element) {
-        try{
+        try {
             return hasAnnotation((PsiField) element);
-        }catch (ClassCastException exception){
+        } catch (ClassCastException exception) {
             return false;
         }
     }
@@ -85,7 +86,7 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
      * 判断目标方法是否包含指定注解
      * Determine whether the target method contains the specified annotation
      *
-     * @param element    method
+     * @param element method
      * @return contains
      */
     public boolean hasAnnotation(PsiMethod element) {
@@ -104,7 +105,7 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
      * 判断目标属性是否包含指定注解
      * Determine whether the target method contains the specified annotation
      *
-     * @param element    method
+     * @param element method
      * @return contains
      */
     public boolean hasAnnotation(PsiField element) {
