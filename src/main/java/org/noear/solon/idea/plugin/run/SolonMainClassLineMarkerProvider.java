@@ -2,8 +2,6 @@ package org.noear.solon.idea.plugin.run;
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
-import com.intellij.execution.RunManager;
-import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
@@ -38,13 +36,20 @@ public class SolonMainClassLineMarkerProvider implements LineMarkerProvider {
             return null;
         }
 
+        PsiElement nameIdentifier = psiClass.getNameIdentifier();
+        if (nameIdentifier == null) {
+            return null;
+        }
+
+        PsiClass targetClass = psiClass;
+
         // 创建行标记信息
         return new LineMarkerInfo<>(
-                psiClass.getNameIdentifier(),
-                psiClass.getTextRange(),
+                nameIdentifier,
+                nameIdentifier.getTextRange(),
                 SolonIcons.SolonIcon_16x16,
                 psiElement -> "Solon Application",
-                null, // 暂时不设置点击处理器
+                (mouseEvent, element1) -> runSolonApplication(targetClass),
                 GutterIconRenderer.Alignment.LEFT,
                 () -> "Run Solon Application"
         );
@@ -65,54 +70,10 @@ public class SolonMainClassLineMarkerProvider implements LineMarkerProvider {
      * 运行 Solon 应用
      */
     private void runSolonApplication(@NotNull PsiClass psiClass) {
-        String className = psiClass.getQualifiedName();
-        if (className == null) {
-            return;
+        SolonRunConfigurationService service = psiClass.getProject().getService(SolonRunConfigurationService.class);
+        if (service != null) {
+            service.runConfiguration(psiClass);
         }
-
-        // 查找或创建运行配置
-        RunConfiguration configuration = findOrCreateRunConfiguration(psiClass.getProject(), className, psiClass);
-        if (configuration != null) {
-            // 运行配置
-            RunManager.getInstance(psiClass.getProject()).setSelectedConfiguration(
-                RunManager.getInstance(psiClass.getProject()).createConfiguration(configuration, configuration.getFactory())
-            );
-        }
-    }
-
-    /**
-     * 查找或创建运行配置
-     */
-    @Nullable
-    private RunConfiguration findOrCreateRunConfiguration(@NotNull com.intellij.openapi.project.Project project,
-                                                         @NotNull String className, @NotNull PsiClass psiClass) {
-        RunManager runManager = RunManager.getInstance(project);
-
-        // 查找现有配置
-        for (RunConfiguration config : runManager.getAllConfigurationsList()) {
-            if (config instanceof SolonRunConfiguration) {
-                SolonRunConfiguration solonConfig = (SolonRunConfiguration) config;
-                if (className.equals(solonConfig.getMainClass())) {
-                    return solonConfig;
-                }
-            }
-        }
-
-        // 创建新配置
-        SolonConfigurationType configurationType = com.intellij.execution.configurations.ConfigurationTypeUtil.findConfigurationType(SolonConfigurationType.class);
-        SolonRunConfiguration newConfig = (SolonRunConfiguration) runManager.createConfiguration(
-                psiClass.getName() + " (Solon)",
-                configurationType.getConfigurationFactories()[0]
-        ).getConfiguration();
-
-        newConfig.setMainClass(className);
-        newConfig.setVmParameters("-Dfile.encoding=UTF-8");
-
-        // 添加到运行管理器
-        runManager.addConfiguration(runManager.createConfiguration(newConfig, newConfig.getFactory()));
-        runManager.setSelectedConfiguration(runManager.createConfiguration(newConfig, newConfig.getFactory()));
-
-        return newConfig;
     }
 
     /**

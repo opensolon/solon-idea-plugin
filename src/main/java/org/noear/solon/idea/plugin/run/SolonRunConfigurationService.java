@@ -1,12 +1,17 @@
 package org.noear.solon.idea.plugin.run;
 
+import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.RunManager;
+import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationTypeUtil;
 import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -29,54 +34,80 @@ public final class SolonRunConfigurationService {
      */
     public void scanAndCreateConfigurations() {
         List<PsiClass> mainClasses = scanner.findSolonMainClasses();
-        RunManager runManager = RunManager.getInstance(project);
-
         for (PsiClass mainClass : mainClasses) {
-            String className = mainClass.getQualifiedName();
-            if (className != null && !configurationExists(className)) {
-                createRunConfiguration(mainClass);
-            }
+            ensureRunConfiguration(mainClass);
         }
     }
 
     /**
-     * 检查配置是否已存在
+     * 运行指定的 Solon 主类
      */
-    private boolean configurationExists(@NotNull String className) {
+    public void runConfiguration(@NotNull PsiClass mainClass) {
+        RunnerAndConfigurationSettings settings = ensureRunConfiguration(mainClass);
+        if (settings == null) {
+            return;
+        }
+
         RunManager runManager = RunManager.getInstance(project);
-        for (RunConfiguration config : runManager.getAllConfigurationsList()) {
-            if (config instanceof SolonRunConfiguration) {
-                SolonRunConfiguration solonConfig = (SolonRunConfiguration) config;
-                if (className.equals(solonConfig.getMainClass())) {
-                    return true;
+        runManager.setSelectedConfiguration(settings);
+        ProgramRunnerUtil.executeConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance());
+    }
+
+    /**
+     * 确保运行配置存在，如不存在则创建
+     */
+    @Nullable
+    public RunnerAndConfigurationSettings ensureRunConfiguration(@NotNull PsiClass mainClass) {
+        String className = mainClass.getQualifiedName();
+        if (className == null) {
+            return null;
+        }
+
+        RunManager runManager = RunManager.getInstance(project);
+        RunnerAndConfigurationSettings existing = findConfigurationSettings(runManager, className);
+        if (existing != null) {
+            return existing;
+        }
+
+        return createRunConfiguration(runManager, mainClass, className);
+    }
+
+    @Nullable
+    private RunnerAndConfigurationSettings findConfigurationSettings(@NotNull RunManager runManager,
+                                                                     @NotNull String className) {
+        for (RunnerAndConfigurationSettings settings : runManager.getAllSettings()) {
+            RunConfiguration configuration = settings.getConfiguration();
+            if (configuration instanceof SolonRunConfiguration) {
+                SolonRunConfiguration solonConfiguration = (SolonRunConfiguration) configuration;
+                if (className.equals(solonConfiguration.getMainClass())) {
+                    return settings;
                 }
             }
         }
-        return false;
+        return null;
     }
 
-    /**
-     * 创建运行配置
-     */
-    private void createRunConfiguration(@NotNull PsiClass mainClass) {
-        String className = mainClass.getQualifiedName();
-        String configName = mainClass.getName() + " (Solon)";
-
-        RunManager runManager = RunManager.getInstance(project);
+    @Nullable
+    private RunnerAndConfigurationSettings createRunConfiguration(@NotNull RunManager runManager,
+                                                                  @NotNull PsiClass mainClass,
+                                                                  @NotNull String className) {
         SolonConfigurationType configurationType = ConfigurationTypeUtil.findConfigurationType(SolonConfigurationType.class);
-        SolonRunConfiguration configuration = (SolonRunConfiguration) runManager.createConfiguration(configName, configurationType.getConfigurationFactories()[0]).getConfiguration();
+        ConfigurationFactory factory = configurationType.getConfigurationFactories()[0];
 
+        String configName = mainClass.getName() + " (Solon)";
+        RunnerAndConfigurationSettings settings = runManager.createConfiguration(configName, factory);
+        RunConfiguration runConfiguration = settings.getConfiguration();
+        if (!(runConfiguration instanceof SolonRunConfiguration)) {
+            return null;
+        }
+
+        SolonRunConfiguration configuration = (SolonRunConfiguration) runConfiguration;
         configuration.setMainClass(className);
         configuration.setVmParameters("-Dfile.encoding=UTF-8");
 
-        // 添加到运行管理器
-        runManager.addConfiguration(runManager.createConfiguration(configuration, configuration.getFactory()));
-
-        // 设置为选中状态
-        runManager.setSelectedConfiguration(runManager.createConfiguration(configuration, configuration.getFactory()));
-
-        // 刷新运行配置
+        runManager.addConfiguration(settings);
         SolonRunDashboardContributor.refreshDashboard(project);
+        return settings;
     }
 
     /**
@@ -84,11 +115,10 @@ public final class SolonRunConfigurationService {
      */
     public void clearAllConfigurations() {
         RunManager runManager = RunManager.getInstance(project);
-        List<RunConfiguration> configurations = runManager.getAllConfigurationsList();
-
-        for (RunConfiguration config : configurations) {
-            if (config instanceof SolonRunConfiguration) {
-                runManager.removeConfiguration(runManager.createConfiguration(config, config.getFactory()));
+        for (RunnerAndConfigurationSettings settings : runManager.getAllSettings()) {
+            RunConfiguration configuration = settings.getConfiguration();
+            if (configuration instanceof SolonRunConfiguration) {
+                runManager.removeConfiguration(settings);
             }
         }
     }

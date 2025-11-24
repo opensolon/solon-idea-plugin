@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.noear.solon.idea.plugin.metadata.source.ConfigurationMetadata;
 import org.noear.solon.idea.plugin.metadata.source.PropertyName;
 import org.noear.solon.idea.plugin.misc.PsiElementUtils;
@@ -34,7 +35,8 @@ class MetadataPropertyImpl implements MetadataProperty {
     private final ConfigurationMetadata.Property metadata;
     @Getter(AccessLevel.PROTECTED)
     private final PropertyName propertyName;
-    private final PsiType propertyType;
+    private final String propertyTypeName;
+    private volatile PsiType propertyType;
 
     private volatile String renderedDocument = null;
 
@@ -43,11 +45,7 @@ class MetadataPropertyImpl implements MetadataProperty {
         this.index = index;
         this.metadata = metadata;
         this.propertyName = PropertyName.of(metadata.getName());
-        if (StringUtils.isBlank(metadata.getType())) {
-            this.propertyType = null;
-        } else {
-            this.propertyType = PsiTypeUtils.createTypeFromText(index.project(), metadata.getType());
-        }
+        this.propertyTypeName = StringUtils.isBlank(metadata.getType()) ? null : metadata.getType();
     }
 
 
@@ -60,7 +58,7 @@ class MetadataPropertyImpl implements MetadataProperty {
 
     @Override
     public Optional<PsiClass> getType() {
-        return Optional.ofNullable(this.propertyType).map(PsiTypeUtils::resolveClassInType);
+        return Optional.ofNullable(resolvePropertyType()).map(PsiTypeUtils::resolveClassInType);
     }
 
     @Override
@@ -148,7 +146,7 @@ class MetadataPropertyImpl implements MetadataProperty {
 
     @Override
     public Optional<PsiType> getFullType() {
-        return Optional.ofNullable(this.propertyType).filter(t -> ReadAction.compute(t::isValid));
+        return Optional.ofNullable(resolvePropertyType()).filter(t -> ReadAction.compute(t::isValid));
     }
 
 
@@ -174,7 +172,7 @@ class MetadataPropertyImpl implements MetadataProperty {
     @Override
     public boolean canBind(@NotNull String key) {
         PropertyName keyName = PropertyName.adapt(key);
-        PsiType myType = getFullType().orElse(null);
+        PsiType myType = resolvePropertyType();
         return this.propertyName.equals(keyName)
                 // A Map property can bind all sub-key-values.
                 || this.propertyName.isAncestorOf(keyName) && PsiTypeUtils.isValueMap(index.project(), myType)
@@ -184,5 +182,18 @@ class MetadataPropertyImpl implements MetadataProperty {
 
     private String getCamelCaseLastName() {
         return PropertyName.toCamelCase(propertyName.getLastElement(DASHED));
+    }
+
+    @Nullable
+    private PsiType resolvePropertyType() {
+        if (propertyType != null || propertyTypeName == null) {
+            return propertyType;
+        }
+        synchronized (this) {
+            if (propertyType == null && propertyTypeName != null) {
+                propertyType = PsiTypeUtils.createTypeFromText(index.project(), propertyTypeName);
+            }
+            return propertyType;
+        }
     }
 }

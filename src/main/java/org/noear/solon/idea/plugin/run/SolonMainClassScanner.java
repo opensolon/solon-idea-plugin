@@ -9,8 +9,8 @@ import com.intellij.psi.search.PsiShortNamesCache;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 扫描服务，用于检测项目中带有 @SolonMain 注解的启动类
@@ -18,8 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service(Service.Level.PROJECT)
 public final class SolonMainClassScanner {
 
+    private static final String SOLON_MAIN = "SolonMain";
+
     private final Project project;
-    private final ConcurrentHashMap<String, PsiClass> cachedMainClasses = new ConcurrentHashMap<>();
 
     public SolonMainClassScanner(@NotNull Project project) {
         this.project = project;
@@ -32,18 +33,20 @@ public final class SolonMainClassScanner {
      */
     @NotNull
     public List<PsiClass> findSolonMainClasses() {
-        List<PsiClass> mainClasses = new ArrayList<>();
-
-        // 使用PSI搜索所有Java文件
         GlobalSearchScope projectScope = GlobalSearchScope.projectScope(project);
         PsiShortNamesCache cache = PsiShortNamesCache.getInstance(project);
+        String[] allClassNames = cache.getAllClassNames();
+        if (allClassNames.length == 0) {
+            return Collections.emptyList();
+        }
 
-        // 搜索所有类
-        PsiClass[] allClasses = cache.getClassesByName("*", projectScope);
-
-        for (PsiClass psiClass : allClasses) {
-            if (hasSolonMainAnnotation(psiClass)) {
-                mainClasses.add(psiClass);
+        List<PsiClass> mainClasses = new ArrayList<>();
+        for (String className : allClassNames) {
+            PsiClass[] classesByName = cache.getClassesByName(className, projectScope);
+            for (PsiClass psiClass : classesByName) {
+                if (psiClass != null && psiClass.isValid() && hasSolonMainAnnotation(psiClass)) {
+                    mainClasses.add(psiClass);
+                }
             }
         }
 
@@ -56,7 +59,8 @@ public final class SolonMainClassScanner {
     private boolean hasSolonMainAnnotation(@NotNull PsiClass psiClass) {
         for (PsiAnnotation annotation : psiClass.getAnnotations()) {
             String qualifiedName = annotation.getQualifiedName();
-            if (qualifiedName != null && qualifiedName.endsWith("SolonMain")) {
+            if (qualifiedName != null && (qualifiedName.endsWith(SOLON_MAIN) || SOLON_MAIN.equals(qualifiedName))) {
+                
                 return true;
             }
         }

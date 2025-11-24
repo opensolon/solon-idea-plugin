@@ -22,12 +22,12 @@ public class SolonRunConfigurationEditor extends SettingsEditor<SolonRunConfigur
 
     @Override
     protected void resetEditorFrom(@NotNull SolonRunConfiguration configuration) {
-        mainClassField.setText(configuration.getName());
+        mainClassField.setText(configuration.getMainClass());
     }
 
     @Override
     protected void applyEditorTo(@NotNull SolonRunConfiguration configuration) {
-        configuration.setName(mainClassField.getText());
+        configuration.setMainClass(mainClassField.getText());
     }
 
     @NotNull

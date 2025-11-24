@@ -72,11 +72,11 @@
 
         <implicitUsageProvider implementation="org.noear.solon.idea.plugin.service.UsageProviderServiceImpl"/>
 
-        <postStartupActivity implementation="org.noear.solon.idea.plugin.metadata.service.MetadataStartupActivity"/>
+        <projectActivity implementation="org.noear.solon.idea.plugin.metadata.service.MetadataStartupActivity"/>
 
         <configurationType implementation="org.noear.solon.idea.plugin.run.SolonConfigurationType"/>
 
-        <postStartupActivity implementation="org.noear.solon.idea.plugin.run.SolonStartupActivity"/>
+        <projectActivity implementation="org.noear.solon.idea.plugin.run.SolonStartupActivity"/>
 
         <codeInsight.lineMarkerProvider language="JAVA" implementationClass="org.noear.solon.idea.plugin.run.SolonMainClassLineMarkerProvider"/>
 

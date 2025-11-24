@@ -23,6 +23,10 @@ public class SolonRunConfiguration extends RunConfigurationBase<SolonRunConfigur
     public SolonRunConfiguration(@NotNull Project project, @NotNull ConfigurationFactory factory, String name) {
         super(project, factory, name);
     }
+    
+    protected @NotNull SolonRunConfigurationOptions createOptions() {
+        return new SolonRunConfigurationOptions();
+    }
 
     @NotNull
     @Override
@@ -81,7 +85,11 @@ public class SolonRunConfiguration extends RunConfigurationBase<SolonRunConfigur
         }
 
         VirtualFile file = psiClass.getContainingFile().getVirtualFile();
-        return ProjectFileIndex.getInstance(project).getModuleForFile(file);
+        Module module = ProjectFileIndex.getInstance(project).getModuleForFile(file);
+        if (module == null) {
+            throw new ExecutionException("无法确定主类所在模块: " + className);
+        }
+        return module;
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.noear.solon.idea.plugin.run;
 
 import com.intellij.execution.RunManager;
 import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.execution.dashboard.RunDashboardManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
@@ -19,8 +20,10 @@ public class SolonRunDashboardContributor {
      * 刷新运行配置
      */
     public static void refreshDashboard(@NotNull Project project) {
-        // 通过 RunManager 刷新配置列表
-        RunManager.getInstance(project).getAllConfigurationsList();
+        RunDashboardManager manager = RunDashboardManager.getInstance(project);
+        if (manager != null) {
+            manager.updateDashboard(false);
+        }
     }
 
     /**

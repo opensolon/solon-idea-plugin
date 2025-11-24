@@ -1,4 +1,5 @@
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.intellij.tasks.InitializeIntelliJPluginTask
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -115,5 +116,9 @@ tasks {
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
         channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+    }
+
+    withType<InitializeIntelliJPluginTask>().configureEach {
+        selfUpdateCheck.set(false)
     }
 }
