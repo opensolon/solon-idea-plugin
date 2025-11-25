@@ -104,7 +104,7 @@ public final class SolonRunConfigurationService {
 
         SolonRunConfiguration configuration = (SolonRunConfiguration) runConfiguration;
         configuration.setMainClass(mainClass);
-        configuration.setVMParameters("-Dfile.encoding=UTF-8");
+        // configuration.setVMParameters("-Dfile.encoding=UTF-8");
 
         runManager.addConfiguration(settings);
         SolonRunDashboardContributor.refreshDashboard(project);
