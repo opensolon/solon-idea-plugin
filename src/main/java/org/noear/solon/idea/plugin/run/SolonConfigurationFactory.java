@@ -1,8 +1,10 @@
 package org.noear.solon.idea.plugin.run;
 
+import com.intellij.execution.application.JvmMainMethodRunConfigurationOptions;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.execution.configurations.RunConfigurationOptions;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,5 +25,10 @@ public class SolonConfigurationFactory extends ConfigurationFactory {
     @Override
     public @NotNull String getId() {
         return "Solon";
+    }
+
+    @Override
+    public @NotNull Class<? extends RunConfigurationOptions> getOptionsClass() {
+        return JvmMainMethodRunConfigurationOptions.class;
     }
 }

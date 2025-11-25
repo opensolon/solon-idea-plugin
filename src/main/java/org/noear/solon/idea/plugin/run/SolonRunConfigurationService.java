@@ -79,7 +79,8 @@ public final class SolonRunConfigurationService {
             RunConfiguration configuration = settings.getConfiguration();
             if (configuration instanceof SolonRunConfiguration) {
                 SolonRunConfiguration solonConfiguration = (SolonRunConfiguration) configuration;
-                if (className.equals(solonConfiguration.getMainClass())) {
+                String existingClass = solonConfiguration.getMainClassName();
+                if (className.equals(existingClass)) {
                     return settings;
                 }
             }
@@ -102,8 +103,8 @@ public final class SolonRunConfigurationService {
         }
 
         SolonRunConfiguration configuration = (SolonRunConfiguration) runConfiguration;
-        configuration.setMainClass(className);
-        configuration.setVmParameters("-Dfile.encoding=UTF-8");
+        configuration.setMainClass(mainClass);
+        configuration.setVMParameters("-Dfile.encoding=UTF-8");
 
         runManager.addConfiguration(settings);
         SolonRunDashboardContributor.refreshDashboard(project);
