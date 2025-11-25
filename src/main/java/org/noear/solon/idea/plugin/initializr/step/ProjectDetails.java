@@ -40,6 +40,8 @@ import static java.util.Objects.requireNonNull;
  */
 public class ProjectDetails {
 
+    private static final Insets DEFAULT_INSETS = new Insets(5, 10, 5, 10);
+
     private final WizardContext wizardContext;
     private final SolonInitializrBuilder moduleBuilder;
     private final SolonCreationMetadata metadata;
@@ -65,6 +67,7 @@ public class ProjectDetails {
         this.moduleBuilder = moduleBuilder;
         this.wizardContext = context;
         this.metadata = this.moduleBuilder.getMetadata();
+        initUI(context);
         SolonMetaServer server = this.metadata.getServer();
         // 创建超链接文本
         ServerUrl_JBLabel = new JBLabel(server.getTitle());
@@ -222,15 +225,81 @@ public class ProjectDetails {
         return Panel_Root;
     }
 
-    public void createUIComponents() {
-        Project project = this.wizardContext.getProject() != null ? wizardContext.getProject() : ProjectManager.getInstance().getDefaultProject();
+    private void initUI(WizardContext context) {
+        Panel_Root = new JPanel(new GridBagLayout());
+        Panel_Root.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        TextField_Location = new TextFieldWithBrowseButton();
+        TextField_Group = new JBTextField();
+        TextField_Artifact = new JBTextField();
+        TextField_PackageName = new JBTextField();
+        CheckBox_InitGit = new JCheckBox("Create Git repository");
+        ComboBox_SolonVer = new JComboBox<>();
+        ComboBox_Archetype = new JComboBox<>();
+        ComboBox_JavaVersion = new JComboBox<>();
+        ComboBox_Language = new JComboBox<>();
+        ComboBox_Type = new JComboBox<>();
+        ComboBox_Packaging = new JComboBox<>();
+        LocationTips = new JLabel("{basePath}/{name}");
+        LocationTips.setForeground(JBColor.GRAY);
+        ServerUrl_Panel = new JPanel(new BorderLayout());
+        ComboBox_JDK = createJdkCombo(context);
+
+        int row = 0;
+        addRow(row++, "Server url", ServerUrl_Panel);
+        addRow(row++, "Solon:", ComboBox_SolonVer);
+        addRow(row++, "Archetype:", ComboBox_Archetype);
+        addRow(row++, "Location:", TextField_Location);
+        addFullWidthComponent(row++, LocationTips);
+        addFullWidthComponent(row++, CheckBox_InitGit);
+        addRow(row++, "Language:", ComboBox_Language);
+        addRow(row++, "Type:", ComboBox_Type);
+        addRow(row++, "Group:", TextField_Group);
+        addRow(row++, "Artifact:", TextField_Artifact);
+        addRow(row++, "Package name:", TextField_PackageName);
+        addRow(row++, "JDK:", ComboBox_JDK);
+        addRow(row++, "Java version:", ComboBox_JavaVersion);
+        addRow(row++, "Packaging:", ComboBox_Packaging);
+
+        GridBagConstraints filler = baseConstraints(row, 0);
+        filler.gridwidth = 2;
+        filler.weighty = 1;
+        Panel_Root.add(Box.createVerticalGlue(), filler);
+    }
+
+    private JdkComboBox createJdkCombo(WizardContext context) {
+        Project project = context.getProject() != null ? context.getProject() : ProjectManager.getInstance().getDefaultProject();
         ProjectSdksModel sdksModel = new ProjectSdksModel();
         sdksModel.reset(project);
+        return new JdkComboBox(project, sdksModel, sdk -> sdk instanceof JavaSdkType, null, null, null);
+    }
 
-        ComboBox_JDK = new JdkComboBox(project, sdksModel, sdk -> sdk instanceof JavaSdkType, null, null, null);
+    private void addRow(int row, String label, JComponent component) {
+        JLabel jLabel = new JLabel(label);
+        GridBagConstraints labelConstraints = baseConstraints(row, 0);
+        Panel_Root.add(jLabel, labelConstraints);
 
+        GridBagConstraints componentConstraints = baseConstraints(row, 1);
+        componentConstraints.weightx = 1;
+        componentConstraints.fill = GridBagConstraints.HORIZONTAL;
+        Panel_Root.add(component, componentConstraints);
+    }
 
+    private void addFullWidthComponent(int row, JComponent component) {
+        GridBagConstraints constraints = baseConstraints(row, 0);
+        constraints.gridwidth = 2;
+        constraints.weightx = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        Panel_Root.add(component, constraints);
+    }
+
+    private GridBagConstraints baseConstraints(int row, int column) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = column;
+        gbc.gridy = row;
+        gbc.insets = DEFAULT_INSETS;
+        gbc.anchor = GridBagConstraints.WEST;
+        return gbc;
     }
 
     public boolean validate(ModuleBuilder moduleBuilder, WizardContext wizardContext)
