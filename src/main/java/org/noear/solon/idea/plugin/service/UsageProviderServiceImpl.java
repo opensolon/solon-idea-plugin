@@ -1,10 +1,7 @@
 package org.noear.solon.idea.plugin.service;
 
 import com.intellij.codeInsight.daemon.ImplicitUsageProvider;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,22 +28,26 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
     @Override
     public boolean isImplicitUsage(@NotNull PsiElement element) {
         if (element instanceof PsiField) {
-            return hasAnnotation((PsiField) element);
+            return hasFieldAnnotation((PsiField) element);
         }
         // 如果 element 本身是方法，直接判断注解
         if (element instanceof PsiMethod) {
-            return hasAnnotation((PsiMethod) element);
+            return hasMethodAnnotation((PsiMethod) element);
         }
 
         // 否则去找父方法，strict=false 包含自身
         PsiMethod psiMethod = PsiTreeUtil.getParentOfType(element, PsiMethod.class, false);
         if (psiMethod != null) {
-            return hasAnnotation(psiMethod);
+            return hasMethodAnnotation(psiMethod);
         }
 
         // 查找类，strict=false 包含自身
         PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class, false);
-        return hasAnnotation(psiClass);
+        if (psiClass != null) {
+            return hasClassAnnotation(psiClass);
+        }
+
+        return false;
     }
 
     @Override
@@ -56,9 +57,9 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
 
     @Override
     public boolean isImplicitWrite(@NotNull PsiElement element) {
-        try {
-            return hasAnnotation((PsiField) element);
-        } catch (ClassCastException exception) {
+        if (element instanceof PsiField) {
+            return hasFieldAnnotation((PsiField) element);
+        } else {
             return false;
         }
     }
@@ -70,15 +71,22 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
      * @param element class
      * @return contains
      */
-    public boolean hasAnnotation(PsiClass element) {
+    public boolean hasClassAnnotation(PsiClass element) {
         if (element == null) {
             return false;
         }
-        for (String annotation : CLASS_ANNOTATION) {
-            if (element.hasAnnotation(annotation)) {
-                return true;
-            }
+
+        PsiAnnotation[] annos = element.getAnnotations();
+        if (annos != null && annos.length > 0) {
+            return true;
         }
+
+//        for (String annotation : CLASS_ANNOTATION) {
+//            if (element.hasAnnotation(annotation)) {
+//                return true;
+//            }
+//        }
+
         return false;
     }
 
@@ -89,15 +97,22 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
      * @param element method
      * @return contains
      */
-    public boolean hasAnnotation(PsiMethod element) {
+    public boolean hasMethodAnnotation(PsiMethod element) {
         if (element == null) {
             return false;
         }
-        for (String annotation : METHOD_ANNOTATION) {
-            if (element.hasAnnotation(annotation)) {
-                return true;
-            }
+
+        PsiAnnotation[] annos = element.getAnnotations();
+        if (annos != null && annos.length > 0) {
+            return true;
         }
+
+//        for (String annotation : METHOD_ANNOTATION) {
+//            if (element.hasAnnotation(annotation)) {
+//                return true;
+//            }
+//        }
+
         return false;
     }
 
@@ -108,15 +123,22 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
      * @param element method
      * @return contains
      */
-    public boolean hasAnnotation(PsiField element) {
+    public boolean hasFieldAnnotation(PsiField element) {
         if (element == null) {
             return false;
         }
-        for (String annotation : FIELD_ANNOTATION) {
-            if (element.hasAnnotation(annotation)) {
-                return true;
-            }
+
+        PsiAnnotation[] annos = element.getAnnotations();
+        if (annos != null && annos.length > 0) {
+            return true;
         }
+
+//        for (String annotation : FIELD_ANNOTATION) {
+//            if (element.hasAnnotation(annotation)) {
+//                return true;
+//            }
+//        }
+
         return false;
     }
 }
