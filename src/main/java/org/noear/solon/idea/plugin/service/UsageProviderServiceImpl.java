@@ -78,14 +78,12 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
 
         PsiAnnotation[] annos = element.getAnnotations();
         if (annos != null && annos.length > 0) {
-            return true;
+            for (PsiAnnotation anno : annos) {
+                if (anno.getQualifiedName().startsWith("java.") == false) {
+                    return true;
+                }
+            }
         }
-
-//        for (String annotation : CLASS_ANNOTATION) {
-//            if (element.hasAnnotation(annotation)) {
-//                return true;
-//            }
-//        }
 
         return false;
     }
@@ -104,14 +102,12 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
 
         PsiAnnotation[] annos = element.getAnnotations();
         if (annos != null && annos.length > 0) {
-            return true;
+            for (PsiAnnotation anno : annos) {
+                if (anno.getQualifiedName().startsWith("java.") == false) {
+                    return true;
+                }
+            }
         }
-
-//        for (String annotation : METHOD_ANNOTATION) {
-//            if (element.hasAnnotation(annotation)) {
-//                return true;
-//            }
-//        }
 
         return false;
     }
@@ -130,14 +126,12 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
 
         PsiAnnotation[] annos = element.getAnnotations();
         if (annos != null && annos.length > 0) {
-            return true;
+            for (PsiAnnotation anno : annos) {
+                if (anno.getQualifiedName().startsWith("java.") == false) {
+                    return true;
+                }
+            }
         }
-
-//        for (String annotation : FIELD_ANNOTATION) {
-//            if (element.hasAnnotation(annotation)) {
-//                return true;
-//            }
-//        }
 
         return false;
     }
