@@ -33,14 +33,12 @@
                   implementationClass="org.noear.solon.idea.plugin.filetype.SolonPropertiesFileType"
                   fieldName="INSTANCE"
                   fileNames="app.properties"
-                  extensions="properties"
                   patterns="app-*.properties"/>
 
         <fileType name="solon-yaml-file"
                   implementationClass="org.noear.solon.idea.plugin.filetype.SolonYamlFileType"
                   fieldName="INSTANCE"
                   fileNames="app.yaml;app.yml"
-                  extensions="yaml,yml"
                   patterns="app-*.yaml;app-*.yml"/>
 
         <psi.referenceContributor
