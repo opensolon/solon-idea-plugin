@@ -79,7 +79,7 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
         PsiAnnotation[] annos = element.getAnnotations();
         if (annos != null && annos.length > 0) {
             for (PsiAnnotation anno : annos) {
-                if (anno.getQualifiedName().startsWith("java.") == false) {
+                if (anno.getQualifiedName() != null && anno.getQualifiedName().startsWith("java.") == false) {
                     return true;
                 }
             }
@@ -103,7 +103,7 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
         PsiAnnotation[] annos = element.getAnnotations();
         if (annos != null && annos.length > 0) {
             for (PsiAnnotation anno : annos) {
-                if (anno.getQualifiedName().startsWith("java.") == false) {
+                if (anno.getQualifiedName() != null && anno.getQualifiedName().startsWith("java.") == false) {
                     return true;
                 }
             }
@@ -127,7 +127,7 @@ public class UsageProviderServiceImpl implements ImplicitUsageProvider {
         PsiAnnotation[] annos = element.getAnnotations();
         if (annos != null && annos.length > 0) {
             for (PsiAnnotation anno : annos) {
-                if (anno.getQualifiedName().startsWith("java.") == false) {
+                if (anno.getQualifiedName() != null && anno.getQualifiedName().startsWith("java.") == false) {
                     return true;
                 }
             }
