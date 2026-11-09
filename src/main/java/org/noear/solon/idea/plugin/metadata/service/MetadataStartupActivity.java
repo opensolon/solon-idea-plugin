@@ -6,7 +6,6 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
-import com.intellij.util.ArrayUtil;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
@@ -20,8 +19,10 @@ public class MetadataStartupActivity implements ProjectActivity {
         DumbService.getInstance(project).runWhenSmart(() -> {
             ReadAction.nonBlocking(() -> {
                         Module[] modules = ModuleManager.getInstance(project).getModules();
-                        if (!ArrayUtil.isEmpty(modules)) {
-                            Module module = modules[0];
+                        // 多模块项目中配置文件可能位于任意模块，必须逐个刷新，
+                        // 否则只有 modules[0] 具备元数据，其它模块的 yaml 无法跳转。
+                        for (Module module : modules) {
+                            if (module.isDisposed()) continue;
                             ModuleMetadataService service = module.getService(ModuleMetadataService.class);
                             if (service instanceof ModuleMetadataServiceImpl impl) {
                                 impl.refreshMetadata();

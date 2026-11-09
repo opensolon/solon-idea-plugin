@@ -16,6 +16,7 @@ import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FileTypeIndex;
+import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
@@ -35,9 +36,11 @@ import org.noear.solon.idea.plugin.filetype.SolonYamlFileType;
 import org.noear.solon.idea.plugin.metadata.index.MetadataGroup;
 import org.noear.solon.idea.plugin.metadata.index.MetadataProperty;
 import org.noear.solon.idea.plugin.metadata.service.ModuleMetadataService;
+import org.noear.solon.idea.plugin.metadata.service.SolonConfigFilesService;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -59,6 +62,16 @@ public final class ReferenceService {
 
     public static ReferenceService getInstance(Project project) {
         return project.getService(ReferenceService.class);
+    }
+
+    /**
+     * 元数据刷新后清空正向/反向索引缓存。
+     * <p>索引缓存的依赖目前只有文件列表，元数据（配置类扫描结果）更新不会自动让缓存失效，
+     * 否则首次 Find Usages 若早于扫描完成，会一直命中空结果。</p>
+     */
+    public void clearIndexCache() {
+        yamlIndexHolder.invalidate();
+        propertiesIndexHolder.invalidate();
     }
 
     @Nullable
@@ -118,9 +131,17 @@ public final class ReferenceService {
     }
 
     private MultiValuedMap<String, PsiReference> refreshYamlIndex() {
-        Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(
-                () -> FileTypeIndex.getFiles(SolonYamlFileType.INSTANCE,
-                        GlobalSearchScope.projectScope(project)));
+        Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
+            GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
+            Set<VirtualFile> result = new HashSet<>(
+                    FileTypeIndex.getFiles(SolonYamlFileType.INSTANCE, scope));
+            // 插件组件通过 loadAdd* 加载的 yml 不在 app 命名规则内，也需纳入反向索引
+            result.addAll(FilenameIndex.getAllFilesByExt(project, "yml", scope));
+            result.addAll(FilenameIndex.getAllFilesByExt(project, "yaml", scope));
+            SolonConfigFilesService configFiles = SolonConfigFilesService.getInstance(project);
+            result.removeIf(file -> !configFiles.isSolonConfigFile(file));
+            return result;
+        });
 
         try {
             return this.yamlIndexHolder.getIndex(files);
@@ -130,9 +151,15 @@ public final class ReferenceService {
     }
 
     private MultiValuedMap<String, PsiReference> refreshPropertiesIndex() {
-        Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(
-                () -> FileTypeIndex.getFiles(SolonPropertiesFileType.INSTANCE,
-                        GlobalSearchScope.projectScope(project)));
+        Collection<VirtualFile> files = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
+            GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
+            Set<VirtualFile> result = new HashSet<>(
+                    FileTypeIndex.getFiles(SolonPropertiesFileType.INSTANCE, scope));
+            result.addAll(FilenameIndex.getAllFilesByExt(project, "properties", scope));
+            SolonConfigFilesService configFiles = SolonConfigFilesService.getInstance(project);
+            result.removeIf(file -> !configFiles.isSolonConfigFile(file));
+            return result;
+        });
 
         try {
             return this.propertiesIndexHolder.getIndex(files);
@@ -143,6 +170,11 @@ public final class ReferenceService {
 
     private abstract class AbstractIndexHolder<E extends PsiElement> extends UserDataHolderBase {
         private Collection<VirtualFile> files = Set.of();
+
+        /** 丢弃缓存的索引，下次访问时按最新元数据重建。 */
+        void invalidate() {
+            clearUserData();
+        }
 
         /**
          * @return A map for {@linkplain #getCanonicalName(PsiElement) canonical} name of a field or class to the YamlKeyValues in application.yaml

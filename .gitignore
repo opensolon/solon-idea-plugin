@@ -6,3 +6,4 @@ sandbox
 
 ### Mac files ###
 *.DS_Store
+/.intellijPlatform/

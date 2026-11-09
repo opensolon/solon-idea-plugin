@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -95,7 +96,7 @@ public class AggregatedMetadataIndex implements MetadataIndex {
   @Override
   public @NotNull Map<PropertyName, MetadataGroup> getGroups() {
     return getIndexStream().flatMap(index -> index.getGroups().entrySet().stream()).collect(
-        Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+        firstWins());
   }
 
 
@@ -120,7 +121,7 @@ public class AggregatedMetadataIndex implements MetadataIndex {
   @Override
   public @NotNull Map<PropertyName, MetadataProperty> getProperties() {
     return getIndexStream().flatMap(index -> index.getProperties().entrySet().stream()).collect(
-        Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+        firstWins());
   }
 
 
@@ -136,7 +137,18 @@ public class AggregatedMetadataIndex implements MetadataIndex {
   @Override
   public @NotNull Map<PropertyName, MetadataHint> getHints() {
     return getIndexStream().flatMap(index -> index.getHints().entrySet().stream()).collect(
-        Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+        firstWins());
+  }
+
+
+  /**
+   * 同名条目以靠前的索引（优先级更高）为准。
+   * <p>不能用 {@code Collectors.toUnmodifiableMap}：当用户自定义配置项与 jar 内
+   * metadata 存在同名 key 时会直接抛 {@code IllegalStateException}，
+   * 导致整个元数据聚合失效。</p>
+   */
+  private static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> firstWins() {
+    return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (first, ignored) -> first);
   }
 
 

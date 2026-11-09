@@ -8,4 +8,6 @@ public class SolonIcons {
 
     public static final Icon SolonIcon_16x16 = IconLoader.getIcon("icons/solonIcon_16x16.svg", SolonIcons.class);
 
+    public static final Icon ApiCall_16x16 = IconLoader.getIcon("icons/apiCall_16x16.svg", SolonIcons.class);
+
 }
