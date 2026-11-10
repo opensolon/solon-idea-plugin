@@ -1,8 +1,55 @@
-.gradle
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+.gradle/
+bin/
+build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.soloncode
+.files
+
+### IntelliJ IDEA ###
 .idea
-.qodana
-build
-sandbox
+*.iws
+*.iml
+*.ipr
+*.log
+*.flattened-pom.xml
+*.md
+!soloncode-cli/docs/*.md
+!soloncode-desktop/docs/*.md
+
+### NetBeans ###
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+soloncode-ee/
 
 ### Mac files ###
 *.DS_Store
+.vscode
+.claude
+node_modules/
+.mvm/
+CLAUDE.md
+TODO.md
+/soloncode-cli/src/main/resources/config.yml
+work
+
+.soloncode/
+soloncode-desktop/soloncode-cli/
+soloncode-desktop/src-tauri/target/
+soloncode-desktop/src-tauri/release/
+soloncode-desktop/src-tauri/build/
+soloncode-desktop/src-tauri/resources/
+soloncode-desktop-web/node_modules
+soloncode-desktop-web/dist
