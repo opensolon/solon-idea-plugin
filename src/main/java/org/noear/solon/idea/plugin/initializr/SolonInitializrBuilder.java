@@ -50,6 +50,7 @@ public class SolonInitializrBuilder extends ModuleBuilder {
         // TODO: Change module type to SOLON Module
         ModuleBuilder.deleteModuleFile(super.getModuleFilePath());
         // Change module type to JAVA Module
+        // StdModuleTypes 在 2026.3 (263) 中已移除，改用 JavaModuleType.getModuleType()
         Module module = moduleModel.newModule(super.getModuleFilePath(), JavaModuleType.getModuleType().getId());
         super.setupModule(module);
         ApplicationManager.getApplication().invokeLater(() -> {
