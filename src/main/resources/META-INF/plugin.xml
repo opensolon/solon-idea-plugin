@@ -49,6 +49,10 @@
                 language="Properties"
                 implementation="org.noear.solon.idea.plugin.navigation.forward.PropertiesToCodeReferenceContributor"/>
 
+        <psi.referenceContributor
+                language="JAVA"
+                implementation="org.noear.solon.idea.plugin.navigation.InjectStringLiteralReferenceContributor"/>
+
         <referencesSearch
                 implementation="org.noear.solon.idea.plugin.navigation.backward.PsiToSolonPropertyReferenceSearcher"/>
 
@@ -77,6 +81,15 @@
         <projectActivity implementation="org.noear.solon.idea.plugin.run.SolonStartupActivity"/>
 
         <codeInsight.lineMarkerProvider language="JAVA" implementationClass="org.noear.solon.idea.plugin.run.SolonMainClassLineMarkerProvider"/>
+
+        <codeInsight.lineMarkerProvider language="JAVA" implementationClass="org.noear.solon.idea.plugin.api.ApiCallLineMarkerProvider"/>
+
+        <toolWindow id="Solon API"
+                    anchor="right"
+                    icon="/icons/apiCall_16x16.svg"
+                    factoryClass="org.noear.solon.idea.plugin.api.ui.ApiTestToolWindowFactory"/>
+
+        <projectService serviceImplementation="org.noear.solon.idea.plugin.api.ui.ApiTestToolWindowService"/>
 
     </extensions>
 

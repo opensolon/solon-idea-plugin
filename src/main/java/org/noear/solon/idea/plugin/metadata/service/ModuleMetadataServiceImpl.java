@@ -21,6 +21,8 @@ import org.noear.solon.idea.plugin.metadata.index.FileMetadataSource;
 import org.noear.solon.idea.plugin.metadata.index.MetadataIndex;
 import org.noear.solon.idea.plugin.metadata.source.MetadataFileIndex;
 import org.noear.solon.idea.plugin.misc.ModuleRootUtils;
+import org.noear.solon.idea.plugin.misc.MutableReference;
+import org.noear.solon.idea.plugin.navigation.ReferenceService;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -32,6 +34,8 @@ public final class ModuleMetadataServiceImpl implements ModuleMetadataService {
     private final Project project;
     private final Module module;
     private MetadataIndex index;
+    /** 上一次扫描结果；扫描结果按 PSI 修改计数缓存，未变化时避免重复入队。 */
+    private MetadataIndex lastScanned;
 
 
     public ModuleMetadataServiceImpl(Module module) {
@@ -87,34 +91,45 @@ public final class ModuleMetadataServiceImpl implements ModuleMetadataService {
             }
             return metafiles;
         });
-        if (this.index instanceof AggregatedMetadataIndex aidx) {
-            aidx.refresh();
-        }
-        Set<String> currentFiles = this.index.getSource().stream()
-                .filter(FileMetadataSource.class::isInstance)
-                .map(s -> ((FileMetadataSource) s).getSource().getUrl())
-                .collect(Collectors.toSet());
-        if (currentFiles.containsAll(files.stream().map(VirtualFile::getUrl).collect(Collectors.toSet()))) {
-            // No new metadata files, can stop here.
-            LOG.info("Module \"" + this.module.getName() + "\"'s metadata is up-to-date");
-            return;
-        }
-        // Because the MetadataFileIndex may lag of the creation of new metafiles,
-        // we only accept new metafiles from the index (but won't remove files even if the index doesn't contain it),
-        // the removal of the non-exists ones is done by AggregatedMetadataIndex#refresh()
-        files.removeIf(vf -> currentFiles.contains(vf.getUrl()));
-        LOG.info("Module \"" + this.module.getName() + "\"'s metadata needs refresh");
-        ProjectMetadataService pms = project.getService(ProjectMetadataService.class);
+
+        // (1) 先构建新的 AggregatedMetadataIndex（始终要扫源码，不能因为 jar metadata 没变化就跳过）
         AggregatedMetadataIndex meta = this.index instanceof AggregatedMetadataIndex
                 ? (AggregatedMetadataIndex) this.index
                 : new AggregatedMetadataIndex();
-        for (VirtualFile file : files) {
+        if (this.index instanceof AggregatedMetadataIndex aidx) {
+            aidx.refresh();
+        }
+
+        // (2) 处理 jar metadata 文件（只处理新增的）
+        Set<String> currentFiles = meta.getSource().stream()
+                .filter(FileMetadataSource.class::isInstance)
+                .map(s -> ((FileMetadataSource) s).getSource().getUrl())
+                .collect(Collectors.toSet());
+        Set<VirtualFile> newMetaFiles = new HashSet<>(files);
+        newMetaFiles.removeIf(vf -> currentFiles.contains(vf.getUrl()));
+        ProjectMetadataService pms = project.getService(ProjectMetadataService.class);
+        for (VirtualFile file : newMetaFiles) {
             LOG.info("Adding metadata file: " + file.getUrl());
             meta.addLast(pms.getIndexForMetaFile(file));
+        }
+
+        // (3) 始终扫描项目源码中的 Solon 配置绑定声明
+        try {
+            MetadataIndex scanned = SolonConfigClassScanner.scan(project);
+            if (!scanned.isEmpty() && scanned != lastScanned) {
+                meta.addFirst(MutableReference.immutable(scanned));
+                lastScanned = scanned;
+                LOG.info("Module \"" + this.module.getName() + "\": added "
+                        + scanned.getProperties().size() + " properties from project config classes");
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to scan Solon config classes", e);
         }
         if (!meta.isEmpty()) {
             this.index = meta;
         }
+        // 元数据可能刚刚从空变为可用，清掉 ReferenceService 里基于旧索引构建的缓存
+        ReferenceService.getInstance(project).clearIndexCache();
     }
 
 

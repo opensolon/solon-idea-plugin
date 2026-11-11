@@ -495,10 +495,9 @@ public class ConfigurationPropertyName implements Comparable<ConfigurationProper
         if (getNumberOfElements() != other.getNumberOfElements()) {
             return false;
         }
-        if (this.elements.canShortcutWithSource(ElementType.UNIFORM)
-                && other.elements.canShortcutWithSource(ElementType.UNIFORM)) {
-            return toString().equals(other.toString());
-        }
+        // 不能再用 toString 快路径：它要求双方都是全小写的规范 UNIFORM 元素，
+        // 而 Solon metadata 的驼峰 key（server.wrapPort）同样被识别为 UNIFORM，
+        // 直接比较字符串会漏掉大小写/分隔符差异，必须统一走宽松的逐元素比较。
         return elementsEqual(other);
     }
 
@@ -512,14 +511,13 @@ public class ConfigurationPropertyName implements Comparable<ConfigurationProper
     }
 
     private boolean elementDiffers(Elements e1, Elements e2, int i) {
-        ElementType type1 = e1.getType(i);
-        ElementType type2 = e2.getType(i);
-        if (type1.allowsFastEqualityCheck() && type2.allowsFastEqualityCheck()) {
-            return !fastElementEquals(e1, e2, i);
-        }
-        if (type1.allowsDashIgnoringEqualityCheck() && type2.allowsDashIgnoringEqualityCheck()) {
-            return !dashIgnoringElementEquals(e1, e2, i);
-        }
+        // 统一走宽松比较（忽略大小写、忽略 '-' / '_'）。
+        // 不能使用 fastElementEquals / dashIgnoringElementEquals 快路径：
+        // 它们假定元素已是规范形式（全小写或纯中划线），
+        // 而 Solon 官方 metadata 使用驼峰 key（如 server.wrapPort），
+        // 用户 yaml 也可能写 server.wrap-port；快路径会因大小写敏感导致两者不相等，
+        // 使配置 key 无法命中索引，进而导航完全失效。
+        // 注意 hashCode 本就已经按“小写 + 去分隔符”归一化，宽松比较才能与之一致。
         return !defaultElementEquals(e1, e2, i);
     }
 

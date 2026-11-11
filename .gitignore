@@ -36,6 +36,7 @@ soloncode-ee/
 
 ### Mac files ###
 *.DS_Store
+/.intellijPlatform/
 .vscode
 .claude
 node_modules/
