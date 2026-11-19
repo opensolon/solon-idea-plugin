@@ -52,6 +52,13 @@ dependencies {
     implementation("org.yaml:snakeyaml:2.0")
     implementation("commons-beanutils:commons-beanutils:1.11.0")
     implementation("jakarta.validation:jakarta.validation-api:3.1.0")
+
+    // 单元测试：JUnit 5（Gradle 9 要求显式声明测试引擎，否则 test 任务无法发现用例）
+    testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
+    // IntelliJ 测试框架的 JUnit5TestSessionListener 依赖 JUnit 4 的 junit.framework.TestCase，
+    // 缺失会导致 LauncherSessionListener 无法实例化（ServiceConfigurationError）
+    testImplementation("junit:junit:4.13.2")
 }
 
 // =====================================================================
@@ -167,6 +174,14 @@ val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
 tasks {
     wrapper {
         gradleVersion = properties("gradleVersion")
+    }
+
+    // JUnit Platform 是 JUnit 5 的唯一测试引擎，必须显式启用
+    test {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
     }
 
     named("publishPlugin") {

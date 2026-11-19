@@ -1,29 +1,25 @@
 package org.noear.solon.idea.plugin.metadata.source;
 
+import org.junit.jupiter.api.Test;
 
-import java.util.Objects;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PropertyNameTest {
 
-    public static void main(String[] args) {
+    @Test
+    void shouldSplitBySubName() {
         String oStr = "a.b[*].*.c";
         PropertyName propertyName = PropertyName.of(oStr);
 
-        assert propertyName.toString().equals(oStr);
+        assertEquals(oStr, propertyName.toString());
 
         propertyName = propertyName.subName(1);
-        PropertyNameTest.shouldBeEqual(propertyName.toString(), "b[*].*.c");
+        assertEquals("b[*].*.c", propertyName.toString());
         propertyName = propertyName.subName(1);
-        PropertyNameTest.shouldBeEqual(propertyName.toString(), "[*].*.c");
+        assertEquals("[*].*.c", propertyName.toString());
         propertyName = propertyName.subName(1);
-        PropertyNameTest.shouldBeEqual(propertyName.toString(), "*.c");
+        assertEquals("*.c", propertyName.toString());
         propertyName = propertyName.subName(1);
-        PropertyNameTest.shouldBeEqual(propertyName.toString(), "c");
-    }
-
-    private static void shouldBeEqual(Object s1, Object s2) {
-        if (!Objects.equals(s1, s2)) {
-            throw new RuntimeException("Not equal: " + s1 + " != " + s2);
-        }
+        assertEquals("c", propertyName.toString());
     }
 }
